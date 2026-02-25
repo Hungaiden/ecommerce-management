@@ -9,32 +9,33 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import "./globals.css";
 
 export const metadata: Metadata = {
-    title: "v0 App",
-    description: "Created with v0",
-    generator: "v0.dev",
+  title: "TrendVibe - Fashion Store",
+  description:
+    "Fashion Theme - Discover the latest trends in clothing and accessories",
+  generator: "Next.js",
 };
 
 export default function RootLayout({
-    children,
+  children,
 }: Readonly<{
-    children: React.ReactNode;
+  children: React.ReactNode;
 }>) {
-    return (
-        <html lang="en">
-            <body>
-                <AuthProvider>
-                    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-                        <CartProvider>
-                            <div className="flex min-h-screen flex-col">
-                                <Header />
-                                <main className="flex-1">{children}</main>
-                                <Footer />
-                            </div>
-                            <Toaster />
-                        </CartProvider>
-                    </ThemeProvider>
-                </AuthProvider>
-            </body>
-        </html>
-    );
+  return (
+    <html lang="en">
+      <body>
+        <AuthProvider>
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <CartProvider>
+              <div className="flex min-h-screen flex-col">
+                <Header />
+                <main className="flex-1">{children}</main>
+                <Footer />
+              </div>
+              <Toaster />
+            </CartProvider>
+          </ThemeProvider>
+        </AuthProvider>
+      </body>
+    </html>
+  );
 }

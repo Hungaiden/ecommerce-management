@@ -1,282 +1,193 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-    Facebook,
-    Globe,
-    Instagram,
-    Twitter,
-    Youtube,
-    MapPin,
-    Mail,
-    Phone,
+  Facebook,
+  Instagram,
+  Twitter,
+  Youtube,
+  Mail,
+  Phone,
+  MapPin,
 } from "lucide-react";
 import Link from "next/link";
 
 export function Footer() {
-    return (
-        <footer className="bg-gradient-to-b from-background to-ocean-50 dark:from-background">
-            <div className="container px-4 md:px-6 py-16">
-                <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5">
-                    <div className="space-y-4">
-                        <Link
-                            href="/"
-                            className="flex items-center gap-2 group"
-                        >
-                            <Globe className="h-6 w-6 text-ocean-600 group-hover:text-ocean-700 transition-colors" />
-                            <span className="font-bold text-lg bg-gradient-to-r from-ocean-700 to-ocean-500 bg-clip-text text-transparent">
-                                TravelEase
-                            </span>
-                        </Link>
-                        <p className="text-sm text-muted-foreground">
-                            Discover the world with our curated travel
-                            experiences, personalized itineraries, and exclusive
-                            deals.
-                        </p>
-                        <div className="flex gap-4">
-                            <Link
-                                href="#"
-                                className="text-muted-foreground hover:text-ocean-600 transition-colors"
-                            >
-                                <Facebook className="h-5 w-5" />
-                                <span className="sr-only">Facebook</span>
-                            </Link>
-                            <Link
-                                href="#"
-                                className="text-muted-foreground hover:text-ocean-600 transition-colors"
-                            >
-                                <Twitter className="h-5 w-5" />
-                                <span className="sr-only">Twitter</span>
-                            </Link>
-                            <Link
-                                href="#"
-                                className="text-muted-foreground hover:text-ocean-600 transition-colors"
-                            >
-                                <Instagram className="h-5 w-5" />
-                                <span className="sr-only">Instagram</span>
-                            </Link>
-                            <Link
-                                href="#"
-                                className="text-muted-foreground hover:text-ocean-600 transition-colors"
-                            >
-                                <Youtube className="h-5 w-5" />
-                                <span className="sr-only">YouTube</span>
-                            </Link>
-                        </div>
-                    </div>
-                    <div className="space-y-4">
-                        <h3 className="text-sm font-medium text-ocean-700 dark:text-ocean-400">
-                            Company
-                        </h3>
-                        <ul className="space-y-2 text-sm">
-                            <li>
-                                <Link
-                                    href="/about"
-                                    className="text-muted-foreground hover:text-ocean-600 transition-colors"
-                                >
-                                    About Us
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    href="/careers"
-                                    className="text-muted-foreground hover:text-ocean-600 transition-colors"
-                                >
-                                    Careers
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    href="/press"
-                                    className="text-muted-foreground hover:text-ocean-600 transition-colors"
-                                >
-                                    Press
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    href="/blog"
-                                    className="text-muted-foreground hover:text-ocean-600 transition-colors"
-                                >
-                                    Blog
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    href="/contact"
-                                    className="text-muted-foreground hover:text-ocean-600 transition-colors"
-                                >
-                                    Contact
-                                </Link>
-                            </li>
-                        </ul>
-                    </div>
-                    <div className="space-y-4">
-                        <h3 className="text-sm font-medium text-ocean-700 dark:text-ocean-400">
-                            Destinations
-                        </h3>
-                        <ul className="space-y-2 text-sm">
-                            <li>
-                                <Link
-                                    href="/destinations/europe"
-                                    className="text-muted-foreground hover:text-ocean-600 transition-colors"
-                                >
-                                    Europe
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    href="/destinations/asia"
-                                    className="text-muted-foreground hover:text-ocean-600 transition-colors"
-                                >
-                                    Asia
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    href="/destinations/africa"
-                                    className="text-muted-foreground hover:text-ocean-600 transition-colors"
-                                >
-                                    Africa
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    href="/destinations/north-america"
-                                    className="text-muted-foreground hover:text-ocean-600 transition-colors"
-                                >
-                                    North America
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    href="/destinations/south-america"
-                                    className="text-muted-foreground hover:text-ocean-600 transition-colors"
-                                >
-                                    South America
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    href="/destinations/oceania"
-                                    className="text-muted-foreground hover:text-ocean-600 transition-colors"
-                                >
-                                    Oceania
-                                </Link>
-                            </li>
-                        </ul>
-                    </div>
-                    <div className="space-y-4">
-                        <h3 className="text-sm font-medium text-ocean-700 dark:text-ocean-400">
-                            Support
-                        </h3>
-                        <ul className="space-y-2 text-sm">
-                            <li>
-                                <Link
-                                    href="/help"
-                                    className="text-muted-foreground hover:text-ocean-600 transition-colors"
-                                >
-                                    Help Center
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    href="/faq"
-                                    className="text-muted-foreground hover:text-ocean-600 transition-colors"
-                                >
-                                    FAQ
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    href="/terms"
-                                    className="text-muted-foreground hover:text-ocean-600 transition-colors"
-                                >
-                                    Terms of Service
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    href="/privacy"
-                                    className="text-muted-foreground hover:text-ocean-600 transition-colors"
-                                >
-                                    Privacy Policy
-                                </Link>
-                            </li>
-                            <li>
-                                <Link
-                                    href="/accessibility"
-                                    className="text-muted-foreground hover:text-ocean-600 transition-colors"
-                                >
-                                    Accessibility
-                                </Link>
-                            </li>
-                        </ul>
-                    </div>
-                    <div className="space-y-4 sm:col-span-2 md:col-span-1">
-                        <h3 className="text-sm font-medium text-ocean-700 dark:text-ocean-400">
-                            Subscribe
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                            Subscribe to our newsletter for travel tips and
-                            exclusive offers.
-                        </p>
-                        <div className="flex gap-2">
-                            <Input
-                                placeholder="Email address"
-                                type="email"
-                                className="max-w-[220px] border-ocean-200 focus-visible:ring-ocean-500"
-                            />
-                            <Button
-                                type="submit"
-                                size="sm"
-                                className="bg-ocean-600 hover:bg-ocean-700 text-white"
-                            >
-                                Subscribe
-                            </Button>
-                        </div>
-                        <div className="space-y-2 pt-2">
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <MapPin className="h-4 w-4 text-ocean-500" />
-                                <span>123 Travel Street, City, Country</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <Mail className="h-4 w-4 text-ocean-500" />
-                                <span>contact@travelease.com</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <Phone className="h-4 w-4 text-ocean-500" />
-                                <span>+1 (555) 123-4567</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div className="mt-12 border-t border-ocean-100 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
-                    <p className="text-xs text-muted-foreground">
-                        © {new Date().getFullYear()} TravelEase. All rights
-                        reserved.
-                    </p>
-                    <div className="flex gap-4 text-xs text-muted-foreground">
-                        <Link
-                            href="/terms"
-                            className="hover:text-ocean-600 transition-colors"
-                        >
-                            Terms
-                        </Link>
-                        <Link
-                            href="/privacy"
-                            className="hover:text-ocean-600 transition-colors"
-                        >
-                            Privacy
-                        </Link>
-                        <Link
-                            href="/cookies"
-                            className="hover:text-ocean-600 transition-colors"
-                        >
-                            Cookies
-                        </Link>
-                    </div>
-                </div>
+  return (
+    <footer className="bg-white border-t">
+      <div className="container mx-auto px-4 md:px-6 py-16">
+        <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5">
+          {/* Brand & Newsletter */}
+          <div className="space-y-4 lg:col-span-2">
+            <div>
+              <h3 className="text-xl font-bold mb-2">TrendVibe</h3>
+              <p className="text-xs text-gray-500 uppercase tracking-widest mb-4">
+                THEME
+              </p>
             </div>
-        </footer>
-    );
+            <p className="text-sm text-gray-600">
+              Khám phá xu hướng thời trang mới nhất. Đăng ký nhận bản tin để
+              nhận ưu đãi độc quyền và cập nhật mới.
+            </p>
+            <div className="flex gap-2">
+              <Input
+                type="email"
+                placeholder="Nhập email của bạn"
+                className="max-w-xs"
+              />
+              <Button className="bg-gray-900 hover:bg-gray-800">Đăng ký</Button>
+            </div>
+            <div className="flex gap-4 pt-4">
+              <Link
+                href="#"
+                className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center hover:bg-gray-700 transition-colors"
+              >
+                <Facebook className="h-4 w-4 text-white" />
+              </Link>
+              <Link
+                href="#"
+                className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center hover:bg-gray-700 transition-colors"
+              >
+                <Instagram className="h-4 w-4 text-white" />
+              </Link>
+              <Link
+                href="#"
+                className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center hover:bg-gray-700 transition-colors"
+              >
+                <Twitter className="h-4 w-4 text-white" />
+              </Link>
+              <Link
+                href="#"
+                className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center hover:bg-gray-700 transition-colors"
+              >
+                <Youtube className="h-4 w-4 text-white" />
+              </Link>
+            </div>
+          </div>
+
+          {/* Shop */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold uppercase tracking-wider">
+              Cửa hàng
+            </h3>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link
+                  href="/shop"
+                  className="text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  Hàng mới về
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/shop"
+                  className="text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  Bộ sưu tập Nam
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/shop"
+                  className="text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  Bộ sưu tập Nữ
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/shop"
+                  className="text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  Giảm giá
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Customer Service */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold uppercase tracking-wider">
+              Dịch vụ khách hàng
+            </h3>
+            <ul className="space-y-2 text-sm">
+              <li>
+                <Link
+                  href="/about"
+                  className="text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  Về chúng tôi
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/contact"
+                  className="text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  Liên hệ
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/shipping"
+                  className="text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  Thông tin vận chuyển
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/returns"
+                  className="text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  Đổi trả hàng
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Contact Info */}
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold uppercase tracking-wider">
+              Liên hệ
+            </h3>
+            <ul className="space-y-3 text-sm text-gray-600">
+              <li className="flex items-start gap-2">
+                <MapPin className="h-4 w-4 mt-1 flex-shrink-0" />
+                <span>123 Đường Thời Trang, Hà Nội</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Phone className="h-4 w-4 flex-shrink-0" />
+                <span>+84 (024) 123-4567</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <Mail className="h-4 w-4 flex-shrink-0" />
+                <span>info@trendvibe.com</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Bottom Section */}
+        <div className="border-t mt-12 pt-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-sm text-gray-600">
+              © {new Date().getFullYear()} TrendVibe. Bảo lưu mọi quyền.
+            </p>
+            <div className="flex gap-6 text-sm text-gray-600">
+              <Link href="/privacy" className="hover:text-gray-900">
+                Chính sách bảo mật
+              </Link>
+              <Link href="/terms" className="hover:text-gray-900">
+                Điều khoản dịch vụ
+              </Link>
+              <Link href="/cookies" className="hover:text-gray-900">
+                Chính sách Cookie
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  );
 }

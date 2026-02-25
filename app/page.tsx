@@ -1,465 +1,414 @@
 "use client";
 
-import { FeaturedDestinations } from "@/components/featured-destinations";
-import { Newsletter } from "@/components/newsletter";
-import { PopularTours } from "@/components/popular-tours";
-import SearchTour from "@/components/search-tour";
-import { Testimonials } from "@/components/testimonials";
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardFooter,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import AOS from "aos";
-import "aos/dist/aos.css";
+import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
-import {
-    ArrowRight,
-    CreditCard,
-    Globe,
-    Headphones,
-    Shield,
-    ThumbsUp,
-} from "lucide-react";
+import { Package, Shield, RotateCcw, Headphones } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
+const products = [
+  {
+    id: 1,
+    name: "10K Yellow Gold",
+    price: "2.299.000₫",
+    image:
+      "https://scontent.fhan14-5.fna.fbcdn.net/v/t39.30808-6/622131631_1350139390489716_6436140744286060367_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=13d280&_nc_eui2=AeGYpBTPYVVr5N3n41uFfBMxEuVMF43BURAS5UwXjcFREOWVEfj1m0mB8RYpZbn_isZlOBnlX-vukoZZR-2rCNS_&_nc_ohc=YF2qMfy_snQQ7kNvwHK88R5&_nc_oc=Adkzmim5GKpwb4DGiIlKtGB2i0I_1KBr5rmjUzQ5viASXnd7c895D_X5qepRLri1FZI&_nc_zt=23&_nc_ht=scontent.fhan14-5.fna&_nc_gid=1FFQa9pDVD79qi0TX-6yKA&oh=00_AftPd7TPKBsXv90Yi4ZkGtEgpNN6Ke5WP2m7rW4ESRbtiw&oe=69A37CE3",
+  },
+  {
+    id: 2,
+    name: "Consectetur nibh at",
+    price: "2.759.000₫",
+    image:
+      "https://scontent.fhan14-5.fna.fbcdn.net/v/t39.30808-6/635137841_2374025833046563_4495255480007630933_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=7b2446&_nc_eui2=AeGXwtAaCZqfzihrodxsZJcD0Un4zi44ac3RSfjOLjhpzb6s9hn5Mx1KW_hwIc4DHiqBdTbRjOgjZajCL-Vvbc7a&_nc_ohc=nDIwiCbtuhcQ7kNvwHs-PuE&_nc_oc=AdmTUuO8JyQBvnKjwzaWXZ4VNTm_s92XEbfp3qNVvIYfdzgSoljUBSPsNH5qOdxssFc&_nc_zt=23&_nc_ht=scontent.fhan14-5.fna&_nc_gid=mxjMKiGGWer81d8lutF7Hg&oh=00_AfsjA49PvaMcCjZ-eAFAJuGCWeEql2JBwpt2HJennTnNdA&oe=69A37EB6",
+  },
+  {
+    id: 3,
+    name: "Dignissim molestie",
+    price: "20.299.000₫",
+    image:
+      "https://images.unsplash.com/photo-1611312449408-fcece27cdbb7?w=600&q=80",
+  },
+  {
+    id: 4,
+    name: "Eget scelerisque",
+    price: "8.519.000₫",
+    image:
+      "https://images.unsplash.com/photo-1588117305388-c2631a279f82?w=600&q=80",
+  },
+  {
+    id: 5,
+    name: "Facilisi etiam",
+    price: "5.979.000₫",
+    image:
+      "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600&q=80",
+  },
+  {
+    id: 6,
+    name: "Gravida arcu ac",
+    price: "4.369.000₫",
+    image:
+      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80",
+  },
+];
+
 export default function Home() {
-    const [date, setDate] = useState<Date>();
-    const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [timeLeft, setTimeLeft] = useState({
+    days: 129,
+    hours: 1,
+    mins: 5,
+    secs: 31,
+  });
 
-    useEffect(() => {
-        setIsLoaded(true);
-        AOS.init({
-            duration: 1000,
-            once: false,
-            mirror: true,
-            easing: "ease-in-out",
-            offset: 100,
-            delay: 0,
-            anchorPlacement: "top-bottom",
-            disable: "mobile",
-        });
-    }, []);
+  useEffect(() => {
+    setIsLoaded(true);
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => {
+        let { days, hours, mins, secs } = prev;
+        secs--;
+        if (secs < 0) {
+          secs = 59;
+          mins--;
+        }
+        if (mins < 0) {
+          mins = 59;
+          hours--;
+        }
+        if (hours < 0) {
+          hours = 23;
+          days--;
+        }
+        if (days < 0) {
+          days = 0;
+          hours = 0;
+          mins = 0;
+          secs = 0;
+        }
+        return { days, hours, mins, secs };
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
-    const fadeInUp = {
-        initial: { opacity: 0, y: 60 },
-        animate: { opacity: 1, y: 0 },
-        transition: { duration: 2 },
-    };
-
-    const staggerContainer = {
-        animate: {
-            transition: {
-                staggerChildren: 0.5,
-            },
-        },
-    };
-
-    if (!isLoaded) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <motion.div
-                    initial={{ scale: 0.5, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 0.5 }}
-                    className="text-4xl font-bold"
-                >
-                    Loading...
-                </motion.div>
-            </div>
-        );
-    }
-
+  if (!isLoaded) {
     return (
+      <div className="flex items-center justify-center min-h-screen">
         <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 1 }}
-            className="flex min-h-screen flex-col"
+          initial={{ scale: 0.5, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="text-4xl font-bold"
         >
-            {/* <Header /> */}
-            <main className="flex-1">
-                <section className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/50 z-10" />
-                    <div className="relative h-[800px]">
-                        <video
-                            autoPlay
-                            loop
-                            muted
-                            playsInline
-                            className="absolute inset-0 w-full h-full object-cover"
-                        >
-                            <source
-                                src="https://minio.fares.vn/mixivivu-dev/video/Mixivivuduthuyen.mp4"
-                                type="video/mp4"
-                            />
-                        </video>
-                    </div>
-                    <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8 }}
-                        className="absolute inset-0 z-20 flex items-center justify-center"
-                    >
-                        <div className="container px-4 md:px-6">
-                            <div className="flex flex-col items-center space-y-4 text-center">
-                                <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.8, delay: 0.2 }}
-                                    className="space-y-2"
-                                >
-                                    <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl/none text-white">
-                                        Khám Phá Hành Trình Hoàn Hảo Của Bạn
-                                    </h1>
-                                    <p className="mx-auto max-w-[700px] text-white md:text-xl">
-                                        Khám phá thế giới với những trải nghiệm
-                                        du lịch được chọn lọc, lịch trình cá
-                                        nhân hóa và các ưu đãi độc quyền.
-                                    </p>
-                                </motion.div>
-                            </div>
-                        </div>
-                    </motion.div>
-                    <motion.div
-                        initial={{ opacity: 0, y: 40 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.8, delay: 0.4 }}
-                        className="absolute bottom-0 left-0 right-0 z-20 transform translate-y-1/2"
-                    >
-                        <div className="container px-4 md:px-6">
-                            <Card className="border-none shadow-lg">
-                                <CardContent className="p-0">
-                                    <Tabs
-                                        defaultValue="tours"
-                                        className="w-full"
-                                    >
-                                        <TabsList className="grid w-full grid-cols-1 gap-4 rounded-none rounded-t-lg h-14">
-                                            <TabsTrigger
-                                                value="tours"
-                                                className="data-[state=active]:bg-background rounded-tl-lg"
-                                            >
-                                                <Globe className="mr-2 h-4 w-4" />
-                                                Tour
-                                            </TabsTrigger>
-                                        </TabsList>
-                                        <TabsContent
-                                            value="tours"
-                                            // className="p-6"
-                                        >
-                                            <div className="w-full">
-                                                <SearchTour />
-                                            </div>
-                                        </TabsContent>
-                                    </Tabs>
-                                </CardContent>
-                            </Card>
-                        </div>
-                    </motion.div>
-                </section>
-
-                <section
-                    className="py-24 mt-24 bg-gradient-to-b from-background to-muted"
-                    data-aos="fade-up"
-                    data-aos-mirror="true"
-                    data-aos-anchor-placement="top-bottom"
-                    data-aos-duration="1000"
-                >
-                    <div className="container px-4 md:px-6">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                            <div className="space-y-6">
-                                <motion.div
-                                    initial={{ opacity: 0, y: 20 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    viewport={{ once: false, amount: 0.3 }}
-                                    transition={{ duration: 0.6 }}
-                                    className="flex flex-col items-start justify-center space-y-4"
-                                >
-                                    <div className="space-y-2">
-                                        <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-                                            Điểm Đến Nổi Bật
-                                        </h2>
-                                        <p className="max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                                            Khám phá những điểm đến tuyệt đẹp
-                                            được chọn lọc từ khắp nơi trên thế
-                                            giới
-                                        </p>
-                                    </div>
-                                </motion.div>
-                            </div>
-                            <div className="relative h-[400px] rounded-2xl overflow-hidden shadow-2xl">
-                                <iframe
-                                    src="https://lottie.host/embed/d3469af0-8574-43e0-92a9-8f2d904cd177/QFZ4boVeLU.lottie"
-                                    className="w-full h-full"
-                                ></iframe>
-                            </div>
-                        </div>
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: false, amount: 0.3 }}
-                            transition={{ duration: 0.6 }}
-                        >
-                            <FeaturedDestinations />
-                        </motion.div>
-                    </div>
-                </section>
-
-                <section className="py-24 bg-muted" data-aos="fade-up">
-                    <div className="container px-4 md:px-6">
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6 }}
-                            className="flex flex-col items-center justify-center space-y-4 text-center"
-                        >
-                            <div className="space-y-2">
-                                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-                                    Tour Phổ Biến
-                                </h2>
-                                <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                                    Khám phá những trải nghiệm du lịch được đặt
-                                    nhiều nhất và đánh giá cao
-                                </p>
-                            </div>
-                        </motion.div>
-                        <PopularTours />
-                    </div>
-                </section>
-
-                <section className="py-24" data-aos="fade-up">
-                    <div className="container px-4 md:px-6">
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6 }}
-                            className="flex flex-col items-center justify-center space-y-4 text-center"
-                        >
-                            <div className="space-y-2">
-                                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-                                    Tại Sao Chọn Chúng Tôi?
-                                </h2>
-                                <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                                    Chúng tôi cam kết mang đến trải nghiệm du
-                                    lịch tốt nhất cho bạn
-                                </p>
-                            </div>
-                        </motion.div>
-                        <motion.div
-                            variants={staggerContainer}
-                            initial="initial"
-                            whileInView="animate"
-                            viewport={{ once: true }}
-                            className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4 mt-8"
-                        >
-                            {[
-                                {
-                                    icon: <Shield className="h-8 w-8" />,
-                                    title: "An Toàn & Đáng Tin Cậy",
-                                    description:
-                                        "Đảm bảo an toàn tuyệt đối cho mọi hành trình của bạn",
-                                },
-                                {
-                                    icon: <CreditCard className="h-8 w-8" />,
-                                    title: "Giá Tốt Nhất",
-                                    description:
-                                        "Cam kết giá tốt nhất thị trường với nhiều ưu đãi hấp dẫn",
-                                },
-                                {
-                                    icon: <Headphones className="h-8 w-8" />,
-                                    title: "Hỗ Trợ 24/7",
-                                    description:
-                                        "Đội ngũ tư vấn viên luôn sẵn sàng hỗ trợ bạn mọi lúc",
-                                },
-                                {
-                                    icon: <ThumbsUp className="h-8 w-8" />,
-                                    title: "Hài Lòng 100%",
-                                    description:
-                                        "Cam kết hoàn tiền nếu bạn không hài lòng với dịch vụ",
-                                },
-                            ].map((item, i) => (
-                                <motion.div
-                                    key={i}
-                                    variants={fadeInUp}
-                                    whileHover={{ scale: 1.05 }}
-                                    transition={{ duration: 0.3 }}
-                                >
-                                    <Card className="text-center h-full">
-                                        <CardHeader>
-                                            <motion.div
-                                                whileHover={{ rotate: 360 }}
-                                                transition={{ duration: 0.5 }}
-                                                className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary"
-                                            >
-                                                {item.icon}
-                                            </motion.div>
-                                            <CardTitle className="mt-4">
-                                                {item.title}
-                                            </CardTitle>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <p className="text-muted-foreground">
-                                                {item.description}
-                                            </p>
-                                        </CardContent>
-                                    </Card>
-                                </motion.div>
-                            ))}
-                        </motion.div>
-                    </div>
-                </section>
-
-                <section className="py-24 bg-muted" data-aos="fade-up">
-                    <div className="container px-4 md:px-6">
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6 }}
-                            className="flex flex-col items-center justify-center space-y-4 text-center"
-                        >
-                            <div className="space-y-2">
-                                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-                                    Khách Hàng Nói Gì Về Chúng Tôi
-                                </h2>
-                                <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                                    Đọc những đánh giá từ khách hàng hài lòng
-                                    của chúng tôi
-                                </p>
-                            </div>
-                        </motion.div>
-                        <Testimonials />
-                    </div>
-                </section>
-
-                <section className="py-24" data-aos="fade-up">
-                    <div className="container px-4 md:px-6">
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6 }}
-                            className="flex flex-col items-center justify-center space-y-4 text-center"
-                        >
-                            <div className="space-y-2">
-                                <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl">
-                                    Từ Blog Du Lịch Của Chúng Tôi
-                                </h2>
-                                <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                                    Khám phá mẹo du lịch, hướng dẫn và cảm hứng
-                                    từ các chuyên gia của chúng tôi
-                                </p>
-                            </div>
-                        </motion.div>
-                        <motion.div
-                            variants={staggerContainer}
-                            initial="initial"
-                            whileInView="animate"
-                            viewport={{ once: true }}
-                            className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mt-8"
-                        >
-                            {[1, 2, 3].map((i) => (
-                                <motion.div
-                                    key={i}
-                                    variants={fadeInUp}
-                                    whileHover={{ y: -10 }}
-                                    transition={{ duration: 0.3 }}
-                                >
-                                    <Card className="overflow-hidden h-full">
-                                        <div className="relative h-48">
-                                            <Image
-                                                src={`/placeholder.svg?height=200&width=400&text=Blog+${i}`}
-                                                alt={`Blog post ${i}`}
-                                                fill
-                                                className="object-cover"
-                                            />
-                                        </div>
-                                        <CardHeader>
-                                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                                <span>15/05/2023</span>
-                                                <span>•</span>
-                                                <span>Mẹo Du Lịch</span>
-                                            </div>
-                                            <CardTitle className="line-clamp-2">
-                                                {i === 1 &&
-                                                    "10 Địa Điểm Ẩn ở Đông Nam Á Bạn Phải Ghé Thăm"}
-                                                {i === 2 &&
-                                                    "Cách Đóng Gói Hành Lý Chuyên Nghiệp: Mẹo Du Lịch Cần Thiết"}
-                                                {i === 3 &&
-                                                    "Hướng Dẫn Tối Ưu Du Lịch Châu Âu Tiết Kiệm"}
-                                            </CardTitle>
-                                            <CardDescription className="line-clamp-2">
-                                                {i === 1 &&
-                                                    "Khám phá những điểm đến ít người biết ở Đông Nam Á mang đến trải nghiệm chân thực, tránh xa đám đông du khách."}
-                                                {i === 2 &&
-                                                    "Mẹo đóng gói hành lý từ chuyên gia giúp bạn du lịch nhẹ nhàng và hiệu quả cho mọi loại hành trình."}
-                                                {i === 3 &&
-                                                    "Học cách khám phá Châu Âu với ngân sách tiết kiệm mà không ảnh hưởng đến trải nghiệm."}
-                                            </CardDescription>
-                                        </CardHeader>
-                                        <CardFooter>
-                                            <Link
-                                                href={`/blog/post-${i}`}
-                                                className="inline-flex items-center text-sm font-medium text-primary"
-                                            >
-                                                Read More
-                                                <ArrowRight className="ml-1 h-4 w-4" />
-                                            </Link>
-                                        </CardFooter>
-                                    </Card>
-                                </motion.div>
-                            ))}
-                        </motion.div>
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.6, delay: 0.2 }}
-                            className="flex justify-center mt-8"
-                        >
-                            <Link
-                                href="/blog"
-                                className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-8 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
-                            >
-                                View All Articles
-                            </Link>
-                        </motion.div>
-                    </div>
-                </section>
-
-                <div className="container px-4 md:px-6">
-                    <Card className="border-none shadow-2xl bg-white/80 backdrop-blur-md rounded-2xl">
-                        <CardContent className="p-0">
-                            <div className="flex flex-col items-center justify-center py-8 px-4 md:px-12">
-                                <h2 className="text-2xl md:text-3xl font-bold text-primary mb-2 text-center">
-                                    Tìm kiếm tour du lịch phù hợp
-                                </h2>
-                                <p className="text-muted-foreground mb-6 text-center max-w-xl">
-                                    Nhập điểm đến, ngày khởi hành hoặc các tiêu
-                                    chí khác để khám phá hành trình lý tưởng cho
-                                    bạn.
-                                </p>
-                                <div className="w-full max-w-2xl">
-                                    <div className="">
-                                        <SearchTour />
-                                    </div>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                <Newsletter />
-            </main>
-            {/* <Footer /> */}
+          Loading...
         </motion.div>
+      </div>
     );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 1 }}
+      className="flex min-h-screen flex-col"
+    >
+      <main className="flex-1">
+        {/* Hero Section */}
+        <section className="relative bg-[#e8e8e8] min-h-[700px] flex items-center">
+          <div className="w-full">
+            <div
+              className="hidden lg:grid"
+              style={{ gridTemplateColumns: "1fr 1.8fr 1fr" }}
+            >
+              {/* Left - Model in Black Hoodie */}
+              <motion.div
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8 }}
+                className="h-[700px] bg-cover bg-center relative"
+                style={{
+                  backgroundImage:
+                    "url(https://images.unsplash.com/photo-1581044777550-4cfa60707c03?w=800&q=90)",
+                }}
+              >
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      "linear-gradient(to right, transparent 40%, #e8e8e8 100%)",
+                  }}
+                />
+              </motion.div>
+
+              {/* Center - Content */}
+              <motion.div
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="text-center flex flex-col items-center justify-center px-8"
+              >
+                <h1 className="text-4xl md:text-6xl font-light tracking-tight mb-6">
+                  TrendVibe
+                </h1>
+                <p className="text-base md:text-lg text-gray-500 mb-10 max-w-xl mx-auto tracking-wide">
+                  Make yours celebrations even more special this years with
+                  beautiful.
+                </p>
+                <Link href="/shop">
+                  <Button
+                    size="lg"
+                    className="bg-[#3d3d3d] hover:bg-[#2d2d2d] text-white px-10 py-6 text-base font-normal rounded-none tracking-wide transition-all duration-300"
+                  >
+                    Go to shop
+                  </Button>
+                </Link>
+              </motion.div>
+
+              {/* Right - Model in Gray Sweater */}
+              <motion.div
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                className="h-[700px] bg-cover bg-center relative"
+                style={{
+                  backgroundImage:
+                    "url(https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=800&q=90)",
+                }}
+              >
+                <div
+                  className="absolute inset-0"
+                  style={{
+                    background:
+                      "linear-gradient(to left, transparent 40%, #e8e8e8 100%)",
+                  }}
+                />
+              </motion.div>
+            </div>
+
+            {/* Mobile view */}
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="lg:hidden text-center py-20 px-8"
+            >
+              <h1 className="text-4xl font-light tracking-tight mb-6">
+                TrendVibe
+              </h1>
+              <p className="text-base text-gray-500 mb-10 max-w-xl mx-auto tracking-wide">
+                Make yours celebrations even more special this years with
+                beautiful.
+              </p>
+              <Link href="/shop">
+                <Button
+                  size="lg"
+                  className="bg-[#3d3d3d] hover:bg-[#2d2d2d] text-white px-10 py-6 text-base font-normal rounded-none tracking-wide transition-all duration-300"
+                >
+                  Go to shop
+                </Button>
+              </Link>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Features Section */}
+        <section className="bg-[#2d2d2d] py-12">
+          <div className="container mx-auto px-4 md:px-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="flex items-start gap-4"
+              >
+                <div className="flex-shrink-0">
+                  <Package className="h-12 w-12 text-gray-400 stroke-[1.5]" />
+                </div>
+                <div>
+                  <h3 className="text-white font-normal text-lg mb-1">
+                    Giao hàng nhanh nhất
+                  </h3>
+                  <p className="text-gray-400 text-sm">Đơn hàng từ 800.000đ</p>
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="flex items-start gap-4"
+              >
+                <div className="flex-shrink-0">
+                  <Shield className="h-12 w-12 text-gray-400 stroke-[1.5]" />
+                </div>
+                <div>
+                  <h3 className="text-white font-normal text-lg mb-1">
+                    Thanh toán an toàn 100%
+                  </h3>
+                  <p className="text-gray-400 text-sm">Trả góp 9 tháng</p>
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="flex items-start gap-4"
+              >
+                <div className="flex-shrink-0">
+                  <RotateCcw className="h-12 w-12 text-gray-400 stroke-[1.5]" />
+                </div>
+                <div>
+                  <h3 className="text-white font-normal text-lg mb-1">
+                    Đổi trả trong 14 ngày
+                  </h3>
+                  <p className="text-gray-400 text-sm">Mua sắm với sự tự tin</p>
+                </div>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3 }}
+                className="flex items-start gap-4"
+              >
+                <div className="flex-shrink-0">
+                  <Headphones className="h-12 w-12 text-gray-400 stroke-[1.5]" />
+                </div>
+                <div>
+                  <h3 className="text-white font-normal text-lg mb-1">
+                    Hỗ trợ 24/7
+                  </h3>
+                  <p className="text-gray-400 text-sm">Giao hàng tận nhà</p>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+        </section>
+
+        {/* Featured Products Section */}
+        <section className="py-16 bg-white">
+          <div className="container mx-auto px-4 md:px-6">
+            {/* Section Title */}
+            <div className="flex items-center gap-6 mb-10">
+              <div className="flex-1 h-px bg-gray-200" />
+              <h2 className="text-2xl font-light tracking-wide whitespace-nowrap">
+                Sản phẩm nổi bật
+              </h2>
+              <div className="flex-1 h-px bg-gray-200" />
+            </div>
+
+            {/* Top Row: Banner + 2 Products */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+              {/* Left - Banner with countdown */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="relative overflow-hidden group cursor-pointer"
+                style={{ height: "480px" }}
+              >
+                <div
+                  className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
+                  style={{
+                    backgroundImage:
+                      "url(https://images.unsplash.com/photo-1548126032-079a0fb0099d?w=800&q=80)",
+                  }}
+                />
+                <div className="absolute inset-0 bg-black/20" />
+                <div className="absolute bottom-10 left-8 text-white">
+                  {/* Countdown */}
+                  <div className="flex gap-2 mb-4">
+                    {[
+                      { val: timeLeft.days, label: "Days" },
+                      { val: timeLeft.hours, label: "Hours" },
+                      { val: timeLeft.mins, label: "Mins" },
+                      { val: timeLeft.secs, label: "Secs" },
+                    ].map(({ val, label }) => (
+                      <div
+                        key={label}
+                        className="bg-white text-black text-sm font-medium px-3 py-1.5 min-w-[64px] text-center"
+                      >
+                        {String(val).padStart(2, "0")} {label}
+                      </div>
+                    ))}
+                  </div>
+                  <h3 className="text-2xl md:text-3xl font-light mb-5">
+                    The Classics Make A Comeback
+                  </h3>
+                  <Link href="/shop">
+                    <Button className="bg-[#3d3d3d] hover:bg-[#2d2d2d] text-white rounded-none px-8 py-5 text-sm font-normal tracking-wide">
+                      Mua ngay
+                    </Button>
+                  </Link>
+                </div>
+              </motion.div>
+
+              {/* Right - 2 product cards stacked */}
+              <div className="grid grid-cols-2 gap-4">
+                {products.slice(0, 2).map((product, i) => (
+                  <motion.div
+                    key={product.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: i * 0.1 }}
+                    className="group cursor-pointer"
+                  >
+                    <div
+                      className="overflow-hidden"
+                      style={{ height: "230px" }}
+                    >
+                      <Image
+                        src={product.image}
+                        alt={product.name}
+                        width={600}
+                        height={230}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                    <div className="pt-3">
+                      <h3 className="text-sm font-normal text-gray-800 mb-1">
+                        {product.name}
+                      </h3>
+                      <p className="text-sm text-gray-500">{product.price}</p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            {/* Bottom Row: 4 Products */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {products.slice(2).map((product, i) => (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                  className="group cursor-pointer"
+                >
+                  <div className="overflow-hidden" style={{ height: "260px" }}>
+                    <Image
+                      src={product.image}
+                      alt={product.name}
+                      width={600}
+                      height={260}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="pt-3">
+                    <h3 className="text-sm font-normal text-gray-800 mb-1">
+                      {product.name}
+                    </h3>
+                    <p className="text-sm text-gray-500">{product.price}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </main>
+    </motion.div>
+  );
 }
