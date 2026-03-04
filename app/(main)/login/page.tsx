@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts/AuthContext";
-import { setCookie } from "@/lib/cookies";
 import { login } from "@/service/auth";
 import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
@@ -34,16 +33,8 @@ export default function LoginPage() {
         response.data.accessToken,
         response.data.refreshToken,
         response.data.userInfo,
+        formData.remember,
       );
-
-      setCookie("accessToken", response.data.accessToken, {
-        expires: formData.remember ? 7 : 1,
-      });
-      setCookie("refreshToken", response.data.refreshToken, {
-        expires: formData.remember ? 30 : 7,
-      });
-
-      toast.success("Đăng nhập thành công!");
     } catch (error: any) {
       toast.error(
         error.response?.data?.message || "Email hoặc mật khẩu không đúng!",

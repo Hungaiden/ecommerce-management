@@ -191,12 +191,57 @@ export function Header() {
               <span className="sr-only">Tìm kiếm</span>
             </Button>
 
-            <Link
-              href="/login"
-              className="hidden md:flex items-center text-[15px] font-normal tracking-wide hover:text-black transition-colors px-3 py-2"
-            >
-              Đăng nhập
-            </Link>
+            {/* Desktop: hiện dropdown khi đã đăng nhập, hiện link khi chưa */}
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="hidden md:flex items-center gap-2 px-3 py-2 hover:bg-transparent"
+                  >
+                    <div className="w-7 h-7 rounded-full bg-gray-900 text-white flex items-center justify-center text-xs font-medium">
+                      {user.fullName?.charAt(0).toUpperCase() ?? "U"}
+                    </div>
+                    <span className="text-[15px] font-normal tracking-wide max-w-[120px] truncate">
+                      {user.fullName}
+                    </span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel className="flex flex-col gap-0.5">
+                    <span className="font-medium">{user.fullName}</span>
+                    <span className="text-xs text-gray-400 font-normal truncate">
+                      {user.email}
+                    </span>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/profile" className="cursor-pointer">
+                      Hồ sơ của tôi
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/bookings" className="cursor-pointer">
+                      Đơn hàng của tôi
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={logout}
+                    className="cursor-pointer text-red-600 focus:text-red-600"
+                  >
+                    Đăng xuất
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link
+                href="/login"
+                className="hidden md:flex items-center text-[15px] font-normal tracking-wide hover:text-black transition-colors px-3 py-2"
+              >
+                Đăng nhập
+              </Link>
+            )}
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

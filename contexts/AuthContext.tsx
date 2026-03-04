@@ -6,86 +6,87 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
 
 interface User {
-    userId: string;
-    email: string;
-    role: string;
-    fullName: string;
+  userId: string;
+  email: string;
+  role: string;
+  fullName: string;
 }
 
 interface AuthContextType {
-    user: User | null;
-    isLoggedIn: boolean;
-    login: (accessToken: string, refreshToken: string, userInfo: User) => void;
-    logout: () => void;
+  user: User | null;
+  isLoggedIn: boolean;
+  login: (
+    accessToken: string,
+    refreshToken: string,
+    userInfo: User,
+    remember?: boolean,
+  ) => void;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [user, setUser] = useState<User | null>(() => {
-        const userInfo = getCookie("userInfo");
+  const [user, setUser] = useState<User | null>(() => {
+    const userInfo = getCookie("userInfo");
 
-        return JSON.parse(userInfo ? userInfo : "null");
-    });
-    const router = useRouter();
+    return JSON.parse(userInfo ? userInfo : "null");
+  });
+  const router = useRouter();
 
-    const login = (
-        accessToken: string,
-        refreshToken: string,
-        userInfo: User
-    ) => {
-        console.log("Login called with:", {
-            accessToken,
-            refreshToken,
-            userInfo,
-        });
-        try {
-            // Lưu token và thông tin user vào cookie với thời hạn
-            setCookie("accessToken", accessToken, { expires: 7 }); // 7 ngày
-            setCookie("refreshToken", refreshToken, { expires: 30 }); // 30 ngày
-            setCookie("userInfo", JSON.stringify(userInfo), { expires: 7 }); // 7 ngày
+  const login = (
+    accessToken: string,
+    refreshToken: string,
+    userInfo: User,
+    remember: boolean = false,
+  ) => {
+    try {
+      const accessExpiry = remember ? 7 : 1;
+      const refreshExpiry = remember ? 30 : 7;
 
-            console.log("Cookies set, updating user state");
-            setUser(userInfo);
-            toast.success("Đăng nhập thành công!");
-            router.push("/");
-        } catch (error) {
-            console.error("Error during login:", error);
-            toast.error("Có lỗi xảy ra khi đăng nhập");
-        }
-    };
+      setCookie("accessToken", accessToken, { expires: accessExpiry });
+      setCookie("refreshToken", refreshToken, { expires: refreshExpiry });
+      setCookie("userInfo", JSON.stringify(userInfo), {
+        expires: accessExpiry,
+      });
 
-    const logout = () => {
-        console.log("Logout called");
-        removeCookie("accessToken");
-        removeCookie("refreshToken");
-        removeCookie("userInfo");
-        setUser(null);
-        toast.success("Đăng xuất thành công!");
-        router.push("/");
-    };
+      setUser(userInfo);
+      toast.success("Đăng nhập thành công!");
+      router.push("/");
+    } catch (error) {
+      console.error("Error during login:", error);
+      toast.error("Có lỗi xảy ra khi đăng nhập");
+    }
+  };
 
-    console.log("Current user state:", user);
-    console.log("Is logged in:", !!user);
+  const logout = () => {
+    console.log("Logout called");
+    removeCookie("accessToken");
+    removeCookie("refreshToken");
+    removeCookie("userInfo");
+    setUser(null);
+    toast.success("Đăng xuất thành công!");
+    router.push("/");
+  };
 
-    return (
-        <AuthContext.Provider
-            value={{
-                user,
-                isLoggedIn: !!user,
-                login,
-                logout,
-            }}
-        >
-            {children}
-        </AuthContext.Provider>
-    );
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        isLoggedIn: !!user,
+        login,
+        logout,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {
-    const context = useContext(AuthContext);
-    if (context === undefined) {
-        throw new Error("useAuth must be used within an AuthProvider");
-    }
-    return context;
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
 }
