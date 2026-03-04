@@ -24,9 +24,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
         const data = await adminGetProduct(id);
         setProduct(data);
       } catch (err: any) {
-        setError(
-          err?.response?.data?.message ?? "Không tìm thấy sản phẩm",
-        );
+        setError(err?.response?.data?.message ?? "Không tìm thấy sản phẩm");
       } finally {
         setLoading(false);
       }
@@ -49,7 +47,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
           </Link>
           <ChevronRight className="h-3.5 w-3.5" />
           <span className="truncate max-w-[200px] text-gray-900">
-            {loading ? "Đang tải..." : product?.name ?? "Không tìm thấy"}
+            {loading ? "Đang tải..." : (product?.name ?? "Không tìm thấy")}
           </span>
         </nav>
 

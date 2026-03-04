@@ -487,9 +487,7 @@ export function ProductForm({ mode, initialData }: ProductFormProps) {
                 <Label>Trạng thái bán hàng</Label>
                 <Select
                   value={form.status}
-                  onValueChange={(v) =>
-                    set("status", v as FormData["status"])
-                  }
+                  onValueChange={(v) => set("status", v as FormData["status"])}
                 >
                   <SelectTrigger>
                     <SelectValue />

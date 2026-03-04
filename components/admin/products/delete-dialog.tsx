@@ -49,8 +49,8 @@ export function DeleteProductDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Xác nhận xóa sản phẩm</AlertDialogTitle>
           <AlertDialogDescription>
-            Hành động này không thể hoàn tác. Sản phẩm sẽ bị xóa vĩnh viễn
-            khỏi hệ thống.
+            Hành động này không thể hoàn tác. Sản phẩm sẽ bị xóa vĩnh viễn khỏi
+            hệ thống.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

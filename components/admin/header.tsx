@@ -44,7 +44,11 @@ export function AdminHeader({ title, description }: AdminHeaderProps) {
       {/* Right side actions */}
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="sm" asChild>
-          <Link href="/" target="_blank" className="flex items-center gap-1.5 text-gray-600">
+          <Link
+            href="/"
+            target="_blank"
+            className="flex items-center gap-1.5 text-gray-600"
+          >
             <Home className="h-4 w-4" />
             <span className="hidden sm:inline">Về trang chủ</span>
           </Link>

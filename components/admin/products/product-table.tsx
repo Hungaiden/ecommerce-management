@@ -37,7 +37,11 @@ interface ProductTableProps {
   onDeleted?: (id: string) => void;
 }
 
-export function ProductTable({ products, loading, onDeleted }: ProductTableProps) {
+export function ProductTable({
+  products,
+  loading,
+  onDeleted,
+}: ProductTableProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   if (loading) {

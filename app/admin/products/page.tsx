@@ -4,7 +4,10 @@ import { useState, useCallback } from "react";
 import Link from "next/link";
 import { AdminHeader } from "@/components/admin/header";
 import { ProductTable } from "@/components/admin/products/product-table";
-import { ProductFilters, type Filters } from "@/components/admin/products/product-filters";
+import {
+  ProductFilters,
+  type Filters,
+} from "@/components/admin/products/product-filters";
 import { Button } from "@/components/ui/button";
 import {
   Pagination,
