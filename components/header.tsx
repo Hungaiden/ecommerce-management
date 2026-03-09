@@ -17,7 +17,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/context/AuthContext";
+import { useCart } from "@/context/cart-context";
 import {
   Facebook,
   Instagram,
@@ -39,7 +40,8 @@ export function Header() {
   const { user, logout } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
-  const [cartCount, setCartCount] = useState(0);
+  const { getCartCount } = useCart();
+  const cartCount = getCartCount();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -185,7 +187,7 @@ export function Header() {
             <Button
               variant="ghost"
               size="icon"
-              className="hover:bg-transparent"
+              className="hover:bg-transparent hover:text-gray-900"
             >
               <Search className="h-5 w-5 md:h-6 md:w-6 stroke-[1.5]" />
               <span className="sr-only">Tìm kiếm</span>
@@ -197,7 +199,7 @@ export function Header() {
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="hidden md:flex items-center gap-2 px-3 py-2 hover:bg-transparent"
+                    className="hidden md:flex items-center gap-2 px-3 py-2 hover:bg-transparent hover:text-gray-900"
                   >
                     <div className="w-7 h-7 rounded-full bg-gray-900 text-white flex items-center justify-center text-xs font-medium">
                       {user.fullName?.charAt(0).toUpperCase() ?? "U"}
@@ -248,7 +250,7 @@ export function Header() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="md:hidden hover:bg-transparent"
+                  className="md:hidden hover:bg-transparent hover:text-gray-900"
                 >
                   <User className="h-5 w-5 stroke-[1.5]" />
                   <span className="sr-only">Tài khoản</span>
@@ -301,7 +303,7 @@ export function Header() {
             <Button
               variant="ghost"
               size="icon"
-              className="hover:bg-transparent relative"
+              className="hover:bg-transparent hover:text-gray-900 relative"
             >
               <div className="relative">
                 <Heart className="h-5 w-5 md:h-6 md:w-6 stroke-[1.5]" />
@@ -313,13 +315,15 @@ export function Header() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="hover:bg-transparent relative"
+                className="hover:bg-transparent hover:text-gray-900 relative"
               >
                 <div className="relative">
                   <ShoppingCart className="h-5 w-5 md:h-6 md:w-6 stroke-[1.5]" />
-                  <span className="absolute -top-2 -right-2 h-4 w-4 flex items-center justify-center bg-black text-white text-[10px] font-medium rounded-full">
-                    {cartCount}
-                  </span>
+                  {cartCount > 0 && (
+                    <span className="absolute -top-2 -right-2 h-4 w-4 flex items-center justify-center bg-black text-white text-[10px] font-medium rounded-full">
+                      {cartCount}
+                    </span>
+                  )}
                 </div>
                 <span className="sr-only">Giỏ hàng</span>
               </Button>

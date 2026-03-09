@@ -15,27 +15,27 @@ export function CartSummary() {
 
   return (
     <div className="border rounded-lg p-6 bg-card border-ocean-100 shadow-sm">
-      <h2 className="text-xl font-semibold mb-6 text-ocean-700">Order Summary</h2>
+      <h2 className="text-xl font-semibold mb-6 text-ocean-700">Tóm tắt đơn hàng</h2>
 
       <div className="space-y-4">
         <div className="flex justify-between">
-          <span className="text-muted-foreground">Subtotal</span>
+          <span className="text-muted-foreground">Tạm tính</span>
           <span className="font-medium">{formatCurrency(subtotal)}</span>
         </div>
 
         <div className="flex justify-between">
-          <span className="text-muted-foreground">Tax (10%)</span>
+          <span className="text-muted-foreground">Thuế (10%)</span>
           <span className="font-medium">{formatCurrency(tax)}</span>
         </div>
 
         <div className="flex justify-between">
-          <span className="text-muted-foreground">Shipping</span>
-          <span className="font-medium">{shipping > 0 ? formatCurrency(shipping) : "Free"}</span>
+          <span className="text-muted-foreground">Phí vận chuyển</span>
+          <span className="font-medium">{shipping > 0 ? formatCurrency(shipping) : "Miễn phí"}</span>
         </div>
 
         <div className="border-t border-ocean-100 pt-4 mt-2">
           <div className="flex justify-between font-semibold text-lg">
-            <span>Total</span>
+            <span>Tổng cộng</span>
             <span className="text-ocean-700">{formatCurrency(total)}</span>
           </div>
         </div>
@@ -47,14 +47,14 @@ export function CartSummary() {
           asChild
         >
           <Link href="/checkout">
-            Proceed to Checkout
+            Tiến hành thanh toán
             <ArrowRight className="ml-2 h-4 w-4" />
           </Link>
         </Button>
 
         <div className="text-center text-xs text-muted-foreground mt-4">
-          <p>Secure checkout powered by Stripe</p>
-          <p className="mt-1">Free cancellation up to 48 hours before your trip</p>
+          <p>Thanh toán an toàn & bảo mật</p>
+          <p className="mt-1">Hỗ trợ đổi trả trong vòng 48 giờ</p>
         </div>
       </div>
     </div>

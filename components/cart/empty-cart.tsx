@@ -1,6 +1,6 @@
-import Link from "next/link"
-import { ShoppingCart } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import Link from "next/link";
+import { ShoppingCart } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function EmptyCart() {
   return (
@@ -11,23 +11,20 @@ export function EmptyCart() {
         </div>
       </div>
 
-      <h1 className="text-3xl font-bold mb-4">Your cart is empty</h1>
+      <h1 className="text-3xl font-bold mb-4">Giỏ hàng của bạn đang trống</h1>
       <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-        Looks like you haven't added anything to your cart yet. Explore our tours, hotels, and flights to find your
-        perfect travel experience.
+        Bạn chưa thêm sản phẩm nào vào giỏ hàng. Khám phá cửa hàng để tìm sản
+        phẩm yêu thích nhé!
       </p>
 
       <div className="flex flex-wrap justify-center gap-4">
         <Button asChild>
-          <Link href="/tours">Explore Tours</Link>
+          <Link href="/shop">Khám phá cửa hàng</Link>
         </Button>
         <Button variant="outline" asChild>
-          <Link href="/hotels">Browse Hotels</Link>
-        </Button>
-        <Button variant="outline" asChild>
-          <Link href="/flights">Find Flights</Link>
+          <Link href="/">Về trang chủ</Link>
         </Button>
       </div>
     </div>
-  )
+  );
 }

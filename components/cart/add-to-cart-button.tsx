@@ -1,43 +1,55 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useCart, type CartItem } from "@/context/cart-context"
-import { Button } from "@/components/ui/button"
-import { ShoppingCart } from "lucide-react"
-import { useToast } from "@/components/ui/use-toast"
+import { useState } from "react";
+import { useCart } from "@/context/cart-context";
+import { Button } from "@/components/ui/button";
+import { ShoppingCart } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 interface AddToCartButtonProps {
-  item: Omit<CartItem, "quantity">
-  className?: string
+  productId: string;
+  size?: string;
+  color?: string;
+  quantity?: number;
+  className?: string;
 }
 
-export function AddToCartButton({ item, className }: AddToCartButtonProps) {
-  const [isAdding, setIsAdding] = useState(false)
-  const { addItem } = useCart()
-  const { toast } = useToast()
+export function AddToCartButton({
+  productId,
+  size,
+  color,
+  quantity = 1,
+  className,
+}: AddToCartButtonProps) {
+  const [isAdding, setIsAdding] = useState(false);
+  const { addItem } = useCart();
+  const { toast } = useToast();
 
-  const handleAddToCart = () => {
-    setIsAdding(true)
-
-    // Add item to cart with quantity 1
-    addItem({ ...item, quantity: 1 })
-
-    // Show toast notification
-    toast({
-      title: "Added to cart",
-      description: `${item.name} has been added to your cart.`,
-      duration: 3000,
-    })
-
-    setTimeout(() => {
-      setIsAdding(false)
-    }, 500)
-  }
+  const handleAddToCart = async () => {
+    setIsAdding(true);
+    try {
+      await addItem({ product_id: productId, quantity, size, color });
+      toast({
+        title: "Đã thêm vào giỏ hàng",
+        description: "Sản phẩm đã được thêm vào giỏ hàng của bạn.",
+        duration: 3000,
+      });
+    } catch {
+      toast({
+        title: "Thêm thất bại",
+        description: "Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.",
+        variant: "destructive",
+        duration: 3000,
+      });
+    } finally {
+      setIsAdding(false);
+    }
+  };
 
   return (
     <Button onClick={handleAddToCart} disabled={isAdding} className={className}>
       <ShoppingCart className="mr-2 h-4 w-4" />
-      {isAdding ? "Adding..." : "Add to Cart"}
+      {isAdding ? "Đang thêm..." : "Thêm vào giỏ"}
     </Button>
-  )
+  );
 }

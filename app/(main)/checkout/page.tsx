@@ -50,13 +50,13 @@ export default function CheckoutPage() {
                 <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20">
                     <CheckCircle2 className="h-12 w-12 text-green-600 dark:text-green-500" />
                 </div>
-                <h1 className="mt-6 text-2xl font-bold">Payment Successful!</h1>
+                <h1 className="mt-6 text-2xl font-bold">Thanh toán thành công!</h1>
                 <p className="mt-2 text-muted-foreground">
-                    Your order has been processed successfully.
+                    Đơn hàng của bạn đã được xử lý thành công.
                 </p>
                 <div className="mt-8">
                     <Button asChild size="lg">
-                        <a href="/">Return to Home</a>
+                        <a href="/">Về trang chủ</a>
                     </Button>
                 </div>
             </div>
@@ -65,7 +65,7 @@ export default function CheckoutPage() {
 
     return (
         <div className="container mx-auto px-4 py-8 md:py-12">
-            <h1 className="text-3xl font-bold mb-8">Checkout</h1>
+            <h1 className="text-3xl font-bold mb-8">Thanh toán</h1>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2">
@@ -74,19 +74,19 @@ export default function CheckoutPage() {
                             {/* Customer Information */}
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>Customer Information</CardTitle>
+                                    <CardTitle>Thông tin khách hàng</CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="space-y-2">
                                             <Label htmlFor="firstName">
-                                                First Name
+                                                Họ
                                             </Label>
                                             <Input id="firstName" required />
                                         </div>
                                         <div className="space-y-2">
                                             <Label htmlFor="lastName">
-                                                Last Name
+                                                Tên
                                             </Label>
                                             <Input id="lastName" required />
                                         </div>
@@ -100,7 +100,7 @@ export default function CheckoutPage() {
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label htmlFor="phone">Phone</Label>
+                                        <Label htmlFor="phone">Số điện thoại</Label>
                                         <Input id="phone" type="tel" required />
                                     </div>
                                 </CardContent>
@@ -109,21 +109,21 @@ export default function CheckoutPage() {
                             {/* Billing Address */}
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>Billing Address</CardTitle>
+                                    <CardTitle>Địa chỉ giao hàng</CardTitle>
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <div className="space-y-2">
-                                        <Label htmlFor="address">Address</Label>
+                                        <Label htmlFor="address">Địa chỉ</Label>
                                         <Input id="address" required />
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="space-y-2">
-                                            <Label htmlFor="city">City</Label>
+                                            <Label htmlFor="city">Thành phố</Label>
                                             <Input id="city" required />
                                         </div>
                                         <div className="space-y-2">
                                             <Label htmlFor="state">
-                                                State/Province
+                                                Tỉnh/Quận
                                             </Label>
                                             <Input id="state" required />
                                         </div>
@@ -131,13 +131,13 @@ export default function CheckoutPage() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="space-y-2">
                                             <Label htmlFor="zip">
-                                                ZIP/Postal Code
+                                                Mã bưu chính
                                             </Label>
                                             <Input id="zip" required />
                                         </div>
                                         <div className="space-y-2">
                                             <Label htmlFor="country">
-                                                Country
+                                                Quốc gia
                                             </Label>
                                             <Input id="country" required />
                                         </div>
@@ -148,7 +148,7 @@ export default function CheckoutPage() {
                             {/* Payment Method */}
                             <Card>
                                 <CardHeader>
-                                    <CardTitle>Payment Method</CardTitle>
+                                    <CardTitle>Phương thức thanh toán</CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <Tabs
@@ -157,13 +157,13 @@ export default function CheckoutPage() {
                                     >
                                         <TabsList className="grid w-full grid-cols-3">
                                             <TabsTrigger value="credit-card">
-                                                Credit Card
+                                                Thẻ tín dụng
                                             </TabsTrigger>
                                             <TabsTrigger value="paypal">
                                                 PayPal
                                             </TabsTrigger>
                                             <TabsTrigger value="bank-transfer">
-                                                Bank Transfer
+                                                Chuyển khoản
                                             </TabsTrigger>
                                         </TabsList>
 
@@ -173,7 +173,7 @@ export default function CheckoutPage() {
                                         >
                                             <div className="space-y-2">
                                                 <Label htmlFor="cardName">
-                                                    Name on Card
+                                                    Tên trên thẻ
                                                 </Label>
                                                 <Input
                                                     id="cardName"
@@ -185,7 +185,7 @@ export default function CheckoutPage() {
                                             </div>
                                             <div className="space-y-2">
                                                 <Label htmlFor="cardNumber">
-                                                    Card Number
+                                                    Số thẻ
                                                 </Label>
                                                 <Input
                                                     id="cardNumber"
@@ -199,7 +199,7 @@ export default function CheckoutPage() {
                                             <div className="grid grid-cols-2 gap-4">
                                                 <div className="space-y-2">
                                                     <Label htmlFor="expiry">
-                                                        Expiry Date
+                                                        Ngày hết hạn
                                                     </Label>
                                                     <Input
                                                         id="expiry"
@@ -212,7 +212,7 @@ export default function CheckoutPage() {
                                                 </div>
                                                 <div className="space-y-2">
                                                     <Label htmlFor="cvc">
-                                                        CVC
+                                                        Mã CVV/CVC
                                                     </Label>
                                                     <Input
                                                         id="cvc"
@@ -232,15 +232,13 @@ export default function CheckoutPage() {
                                         >
                                             <div className="text-center p-4">
                                                 <p className="mb-4">
-                                                    You will be redirected to
-                                                    PayPal to complete your
-                                                    payment.
+                                                    Bạn sẽ được chuyển đến PayPal để hoàn tất thanh toán.
                                                 </p>
                                                 <Button
                                                     type="button"
                                                     className="w-full"
                                                 >
-                                                    Continue with PayPal
+                                                    Tiếp tục với PayPal
                                                 </Button>
                                             </div>
                                         </TabsContent>
@@ -251,24 +249,19 @@ export default function CheckoutPage() {
                                         >
                                             <div className="p-4 border rounded-md bg-muted">
                                                 <h3 className="font-medium mb-2">
-                                                    Bank Transfer Details
+                                                    Thông tin chuyển khoản
                                                 </h3>
                                                 <p className="text-sm mb-1">
-                                                    Bank: Example Bank
+                                                    Ngân hàng: Vietcombank
                                                 </p>
                                                 <p className="text-sm mb-1">
-                                                    Account Name: Travel Booking
+                                                    Tên tài khoản: TrendVibe
                                                 </p>
                                                 <p className="text-sm mb-1">
-                                                    Account Number: 1234567890
-                                                </p>
-                                                <p className="text-sm mb-1">
-                                                    Routing Number: 987654321
+                                                    Số tài khoản: 1234567890
                                                 </p>
                                                 <p className="text-sm mt-4">
-                                                    Please include your order
-                                                    number in the transfer
-                                                    description.
+                                                    Vui lòng ghi mã đơn hàng vào nội dung chuyển khoản.
                                                 </p>
                                             </div>
                                         </TabsContent>
@@ -296,12 +289,12 @@ export default function CheckoutPage() {
                                 {isProcessing ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Processing Payment...
+                                        Đang xử lý...
                                     </>
                                 ) : (
                                     <>
                                         <CreditCard className="mr-2 h-4 w-4" />
-                                        {/* Pay ${items.total.toFixed(2)} */}
+                                        Thanh toán ngay
                                     </>
                                 )}
                             </Button>
@@ -322,13 +315,13 @@ export default function CheckoutPage() {
                     <Card className="mt-6">
                         <CardHeader>
                             <CardTitle className="text-sm">
-                                Order Items ({items.length})
+                                Sản phẩm ({items.length})
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-3">
                             {items.map((item) => (
                                 <div
-                                    key={item.id}
+                                    key={item._id}
                                     className="flex justify-between text-sm"
                                 >
                                     <span className="flex-1 truncate">
@@ -338,10 +331,7 @@ export default function CheckoutPage() {
                                         </span>
                                     </span>
                                     <span>
-                                        $
-                                        {(item.price * item.quantity).toFixed(
-                                            2
-                                        )}
+                                        {(item.price * item.quantity).toLocaleString("vi-VN")}₫
                                     </span>
                                 </div>
                             ))}

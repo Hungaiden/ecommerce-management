@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
-import { Facebook, Github, Globe, Twitter } from "lucide-react";
+import { Facebook, Github, Twitter } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { register } from "@/service/register";
@@ -69,8 +69,7 @@ export default function RegisterPage() {
                                 href="/"
                                 className="mx-auto flex items-center gap-2"
                             >
-                                <Globe className="h-6 w-6" />
-                                <span className="font-bold">TravelEase</span>
+                                <span className="font-bold text-lg">TrendVibe</span>
                             </Link>
                             <h1 className="text-3xl font-bold">
                                 Tạo tài khoản

@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/context/AuthContext";
 import { login } from "@/service/auth";
 import { Eye, EyeOff } from "lucide-react";
 import Image from "next/image";
@@ -49,7 +49,7 @@ export default function LoginPage() {
       {/* Left — fashion image */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
         <Image
-          src="https://images.unsplash.com/photo-1558769132-cb1aea8f34e3?w=1200&q=85"
+          src="https://images.unsplash.com/photo-1566206091558-7f218b696731?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NDd8fGZhc2hpb258ZW58MHx8MHx8fDA%3D"
           alt="TrendVibe Fashion"
           fill
           className="object-cover object-center"

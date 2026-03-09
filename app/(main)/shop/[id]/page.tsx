@@ -14,8 +14,10 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { getProduct, type Product } from "@/service/products";
+import { useCart } from "@/context/cart-context";
+import { toast } from "sonner";
 
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?w=600&q=90";
@@ -30,6 +32,45 @@ export default function ProductDetailPage() {
   const [quantity, setQuantity] = useState(1);
   const [activeImage, setActiveImage] = useState(0);
   const [openInfo, setOpenInfo] = useState(true);
+  const [isAdding, setIsAdding] = useState(false);
+  const { addItem } = useCart();
+  const router = useRouter();
+
+  const handleAddToCart = async () => {
+    if (!product) return;
+    setIsAdding(true);
+    try {
+      await addItem({
+        product_id: product._id,
+        quantity,
+        size: selectedSize || undefined,
+        color: selectedColor || undefined,
+      });
+      toast.success("Đã thêm vào giỏ hàng!");
+    } catch {
+      toast.error("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.");
+    } finally {
+      setIsAdding(false);
+    }
+  };
+
+  const handleBuyNow = async () => {
+    if (!product) return;
+    setIsAdding(true);
+    try {
+      await addItem({
+        product_id: product._id,
+        quantity,
+        size: selectedSize || undefined,
+        color: selectedColor || undefined,
+      });
+      router.push("/cart");
+    } catch {
+      toast.error("Vui lòng đăng nhập để mua sản phẩm.");
+    } finally {
+      setIsAdding(false);
+    }
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -290,10 +331,11 @@ export default function ProductDetailPage() {
 
               <Button
                 className="flex-1 bg-[#3d3d3d] hover:bg-[#2d2d2d] text-white rounded-none h-12 text-sm font-normal tracking-widest flex items-center gap-2"
-                disabled={product.status === "out_of_stock"}
+                disabled={product.status === "out_of_stock" || isAdding}
+                onClick={handleAddToCart}
               >
                 <ShoppingCart className="h-4 w-4" />
-                THÊM VÀO GIỎ
+                {isAdding ? "ĐANG THÊM..." : "THÊM VÀO GIỎ"}
               </Button>
             </div>
 
@@ -308,7 +350,8 @@ export default function ProductDetailPage() {
               </div>
               <Button
                 className="w-full bg-[#1a1a1a] hover:bg-black text-white rounded-none h-12 text-sm font-normal tracking-widest flex items-center justify-center gap-2"
-                disabled={product.status === "out_of_stock"}
+                disabled={product.status === "out_of_stock" || isAdding}
+                onClick={handleBuyNow}
               >
                 <ShoppingCart className="h-4 w-4" />
                 MUA NGAY
