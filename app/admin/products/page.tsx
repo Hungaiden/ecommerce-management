@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/pagination";
 import { Plus } from "lucide-react";
 import { adminGetProducts, type Product } from "@/service/admin/products";
+import { ImportExcelDialog } from "@/components/admin/products/import-excel-dialog";
 import { useEffect } from "react";
 
 const PAGE_SIZE = 10;
@@ -77,12 +78,15 @@ export default function AdminProductsPage() {
           <h2 className="text-sm text-gray-500">
             Trang {page} / {totalPages}
           </h2>
-          <Button asChild className="bg-indigo-600 hover:bg-indigo-700">
-            <Link href="/admin/products/create">
-              <Plus className="mr-1.5 h-4 w-4" />
-              Thêm sản phẩm
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <ImportExcelDialog onImported={fetchProducts} />
+            <Button asChild className="bg-indigo-600 hover:bg-indigo-700">
+              <Link href="/admin/products/create">
+                <Plus className="mr-1.5 h-4 w-4" />
+                Thêm sản phẩm
+              </Link>
+            </Button>
+          </div>
         </div>
 
         {/* Filters */}

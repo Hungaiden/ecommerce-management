@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ShoppingCart,
+  Users,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -52,6 +53,11 @@ const navItems: NavItem[] = [
     label: "Giỏ hàng",
     href: "/admin/carts",
     icon: <ShoppingCart className="h-5 w-5" />,
+  },
+  {
+    label: "Tài khoản",
+    href: "/admin/accounts",
+    icon: <Users className="h-5 w-5" />,
   },
 ];
 

@@ -22,7 +22,7 @@ export default function RegisterPage() {
     confirmPassword: "",
     phone: "",
     avatar: "",
-    role_id: "staff", // Mặc định là user
+    role_id: "customer", // enum backend: 'admin' | 'staff' | 'customer'
     status: "active", // Mặc định là active
   });
 
@@ -50,7 +50,7 @@ export default function RegisterPage() {
 
       toast.success("Đăng ký thành công!");
       // Chuyển hướng về trang đăng nhập
-      window.location.href = "/login";
+      router.push("/login");
     } catch (error: any) {
       toast.error(error.response?.data?.message || "Đăng ký thất bại!");
     } finally {

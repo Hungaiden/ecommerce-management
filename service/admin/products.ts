@@ -60,3 +60,21 @@ export const adminDeleteProduct = async (id: string): Promise<Product> => {
   const response = await http.delete(`/products/deleteOne/${id}`);
   return response.data.data;
 };
+
+// ─── Import sản phẩm từ Excel ────────────────────────────────────────────────
+export interface ImportProductResult {
+  success: number;
+  failed: number;
+  errors: { row: number; message: string }[];
+}
+
+export const adminImportProducts = async (
+  file: File,
+): Promise<ImportProductResult> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  const response = await http.post("/products/import", formData, {
+    headers: { "Content-Type": "multipart/form-data" },
+  });
+  return response.data.data;
+};
