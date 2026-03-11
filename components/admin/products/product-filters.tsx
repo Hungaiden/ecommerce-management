@@ -11,9 +11,9 @@ import {
 } from "@/components/ui/select";
 import { Search, X } from "lucide-react";
 import { GetProductsParams } from "@/service/admin/products";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import useDebounce from "@/hooks/useDebounce";
-import { useEffect } from "react";
+import { getCategories, type Category } from "@/service/admin/categories";
 
 export type Filters = Pick<
   GetProductsParams,
@@ -40,6 +40,13 @@ export function ProductFilters({ onChange }: ProductFiltersProps) {
   const [category, setCategory] = useState("all");
   const [sortBy, setSortBy] = useState("createdAt");
   const [sortType, setSortType] = useState<"asc" | "desc">("desc");
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    getCategories({ limit: 100 })
+      .then((res) => setCategories(res?.hits ?? []))
+      .catch(() => {});
+  }, []);
 
   const debouncedKeyword = useDebounce(keyword, 400);
 
@@ -110,9 +117,9 @@ export function ProductFilters({ onChange }: ProductFiltersProps) {
         </SelectTrigger>
         <SelectContent>
           <SelectItem value="all">Tất cả</SelectItem>
-          {CATEGORIES.map((cat) => (
-            <SelectItem key={cat} value={cat}>
-              {cat}
+          {categories.map((cat) => (
+            <SelectItem key={cat._id} value={cat.title}>
+              {cat.title}
             </SelectItem>
           ))}
         </SelectContent>

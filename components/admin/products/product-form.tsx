@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -18,23 +18,15 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { X, Plus, Loader2 } from "lucide-react";
+import { X, Plus, Loader2, Upload } from "lucide-react";
 import {
   adminCreateProduct,
   adminUpdateProduct,
   type Product,
   type CreateProductPayload,
 } from "@/service/admin/products";
-
-const CATEGORIES = [
-  "Pullovers",
-  "Shirts",
-  "Pants",
-  "T-Shirts",
-  "Shoes",
-  "Accessories",
-  "Jackets",
-];
+import { getCategories, type Category } from "@/service/admin/categories";
+import { uploadMultipleImages } from "@/service/admin/upload";
 
 const SIZE_OPTIONS = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
 const COLOR_OPTIONS = [
@@ -77,6 +69,14 @@ type FormData = {
 export function ProductForm({ mode, initialData }: ProductFormProps) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    getCategories({ limit: 100 })
+      .then((res) => setCategories(res?.hits ?? []))
+      .catch(() => {});
+  }, []);
 
   const [form, setForm] = useState<FormData>({
     name: initialData?.name ?? "",
@@ -85,7 +85,11 @@ export function ProductForm({ mode, initialData }: ProductFormProps) {
     price: initialData?.price?.toString() ?? "",
     discount: initialData?.discount?.toString() ?? "0",
     brand: initialData?.brand ?? "",
-    category: initialData?.category ?? "",
+    category:
+      typeof initialData?.category === "object" &&
+      initialData?.category !== null
+        ? (initialData.category as { _id: string })._id
+        : (initialData?.category ?? ""),
     material: initialData?.material ?? "",
     stock: initialData?.stock?.toString() ?? "0",
     status: initialData?.status ?? "active",
@@ -133,6 +137,25 @@ export function ProductForm({ mode, initialData }: ProductFormProps) {
     set("images", updated);
     if (form.thumbnail === url) {
       set("thumbnail", updated[0] ?? "");
+    }
+  };
+
+  const handleUploadFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (files.length === 0) return;
+    // reset input để có thể chọn lại cùng file
+    e.target.value = "";
+    setUploading(true);
+    try {
+      const urls = await uploadMultipleImages(files);
+      const newImages = [...form.images, ...urls];
+      set("images", newImages);
+      if (!form.thumbnail && urls.length > 0) set("thumbnail", urls[0]);
+      toast.success(`Đã tải lên ${urls.length} ảnh`);
+    } catch {
+      toast.error("Upload ảnh thất bại, vui lòng thử lại");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -378,11 +401,41 @@ export function ProductForm({ mode, initialData }: ProductFormProps) {
               <CardTitle className="text-base">Hình ảnh sản phẩm</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
+              {/* Upload từ máy */}
+              <div>
+                <label
+                  htmlFor="upload-images"
+                  className="flex cursor-pointer items-center justify-center gap-2 rounded-md border-2 border-dashed border-gray-300 bg-gray-50 px-4 py-3 text-sm text-gray-600 transition hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-600"
+                >
+                  {uploading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Đang tải lên...
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-4 w-4" />
+                      Chọn ảnh từ máy (tối đa 5 ảnh)
+                    </>
+                  )}
+                </label>
+                <input
+                  id="upload-images"
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  disabled={uploading}
+                  onChange={handleUploadFiles}
+                />
+              </div>
+
+              {/* Hoặc nhập URL thủ công */}
               <div className="flex gap-2">
                 <Input
                   value={form.imageInput}
                   onChange={(e) => set("imageInput", e.target.value)}
-                  placeholder="Nhập URL ảnh và nhấn Thêm"
+                  placeholder="Hoặc nhập URL ảnh và nhấn Thêm"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       e.preventDefault();
@@ -466,11 +519,13 @@ export function ProductForm({ mode, initialData }: ProductFormProps) {
                     <SelectValue placeholder="Chọn danh mục" />
                   </SelectTrigger>
                   <SelectContent>
-                    {CATEGORIES.map((cat) => (
-                      <SelectItem key={cat} value={cat}>
-                        {cat}
-                      </SelectItem>
-                    ))}
+                    {categories
+                      .filter((c) => c.status === "active")
+                      .map((cat) => (
+                        <SelectItem key={cat._id} value={cat._id}>
+                          {cat.title}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>

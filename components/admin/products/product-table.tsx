@@ -86,13 +86,18 @@ export function ProductTable({
                   <TableCell>
                     <div className="relative h-10 w-10 overflow-hidden rounded-md border bg-gray-100">
                       <Image
-                        src={product.thumbnail || FALLBACK_IMAGE}
+                        src={
+                          product.thumbnail ||
+                          product.images?.[0] ||
+                          FALLBACK_IMAGE
+                        }
                         alt={product.name}
                         fill
                         className="object-cover"
                         onError={(e) => {
                           (e.target as HTMLImageElement).src = FALLBACK_IMAGE;
                         }}
+                        unoptimized
                       />
                     </div>
                   </TableCell>
@@ -108,7 +113,10 @@ export function ProductTable({
                     {product.sku ?? "—"}
                   </TableCell>
                   <TableCell className="text-sm text-gray-600">
-                    {product.category ?? "—"}
+                    {typeof product.category === "object" &&
+                    product.category !== null
+                      ? product.category.title
+                      : (product.category ?? "—")}
                   </TableCell>
                   <TableCell className="text-right text-sm font-medium">
                     {formatCurrency(product.price)}

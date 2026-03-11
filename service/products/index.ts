@@ -1,5 +1,10 @@
 import http, { ResList } from "../http";
 
+export interface ProductCategory {
+  _id: string;
+  title: string;
+}
+
 export interface Product {
   _id: string;
   name: string;
@@ -11,7 +16,7 @@ export interface Product {
   images?: string[];
   thumbnail?: string;
   brand?: string;
-  category?: string;
+  category?: ProductCategory | string;
   sizes?: string[];
   colors?: string[];
   material?: string;

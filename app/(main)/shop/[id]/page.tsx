@@ -22,6 +22,19 @@ import { toast } from "sonner";
 const FALLBACK_IMAGE =
   "https://images.unsplash.com/photo-1529374255404-311a2a4f1fd9?w=600&q=90";
 
+// category có thể là object {_id, title} sau khi populate, hoặc string
+function getCategoryTitle(category: any): string {
+  if (!category) return "";
+  if (typeof category === "object") return category.title ?? "";
+  return category;
+}
+
+function getCategoryId(category: any): string {
+  if (!category) return "";
+  if (typeof category === "object") return category._id ?? "";
+  return category;
+}
+
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [product, setProduct] = useState<Product | null>(null);
@@ -139,10 +152,10 @@ export default function ProductDetailPage() {
               <>
                 <ChevronRight className="h-3 w-3" />
                 <Link
-                  href={`/shop?category=${product.category}`}
+                  href={`/shop?category=${getCategoryId(product.category)}`}
                   className="hover:text-gray-900 transition-colors"
                 >
-                  {product.category}
+                  {getCategoryTitle(product.category)}
                 </Link>
               </>
             )}
@@ -411,7 +424,9 @@ export default function ProductDetailPage() {
               {product.category && (
                 <p>
                   <span className="font-medium text-gray-800">Danh mục: </span>
-                  <span className="text-gray-500">{product.category}</span>
+                  <span className="text-gray-500">
+                    {getCategoryTitle(product.category)}
+                  </span>
                 </p>
               )}
               <p>

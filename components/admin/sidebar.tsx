@@ -10,7 +10,7 @@ import {
   Package,
   ChevronLeft,
   ChevronRight,
-  Map,
+  ShoppingCart,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -49,9 +49,9 @@ const navItems: NavItem[] = [
     icon: <Package className="h-5 w-5" />,
   },
   {
-    label: "Tours",
-    href: "/admin/tours",
-    icon: <Map className="h-5 w-5" />,
+    label: "Giỏ hàng",
+    href: "/admin/carts",
+    icon: <ShoppingCart className="h-5 w-5" />,
   },
 ];
 

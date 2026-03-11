@@ -24,17 +24,17 @@ export interface CreateProductPayload {
 
 export type UpdateProductPayload = Partial<CreateProductPayload>;
 
-// ─── Lấy danh sách sản phẩm (admin - có thể lấy cả inactive) ───────────────
+// ─── Lấy danh sách sản phẩm ─────────────────────────────────────────────────
 export const adminGetProducts = async (
   params?: GetProductsParams,
 ): Promise<ResList> => {
-  const response = await http.get("/admin/products", { params });
+  const response = await http.get("/products", { params });
   return response.data.data;
 };
 
 // ─── Lấy chi tiết 1 sản phẩm ────────────────────────────────────────────────
 export const adminGetProduct = async (id: string): Promise<Product> => {
-  const response = await http.get(`/admin/products/detail/${id}`);
+  const response = await http.get(`/products/detail/${id}`);
   return response.data.data;
 };
 
@@ -42,7 +42,7 @@ export const adminGetProduct = async (id: string): Promise<Product> => {
 export const adminCreateProduct = async (
   payload: CreateProductPayload,
 ): Promise<Product> => {
-  const response = await http.post("/admin/products/create", payload);
+  const response = await http.post("/products/create", payload);
   return response.data.data;
 };
 
@@ -51,12 +51,12 @@ export const adminUpdateProduct = async (
   id: string,
   payload: UpdateProductPayload,
 ): Promise<Product> => {
-  const response = await http.patch(`/admin/products/update/${id}`, payload);
+  const response = await http.patch(`/products/update/${id}`, payload);
   return response.data.data;
 };
 
 // ─── Xóa sản phẩm ───────────────────────────────────────────────────────────
 export const adminDeleteProduct = async (id: string): Promise<Product> => {
-  const response = await http.delete(`/admin/products/deleteOne/${id}`);
+  const response = await http.delete(`/products/deleteOne/${id}`);
   return response.data.data;
 };

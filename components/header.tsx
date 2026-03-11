@@ -19,29 +19,22 @@ import {
 } from "@/components/ui/sheet";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/cart-context";
-import {
-  Facebook,
-  Instagram,
-  Youtube,
-  Search,
-  Heart,
-  ShoppingCart,
-  Menu,
-  User,
-  MessageCircle,
-} from "lucide-react";
+import { Search, Heart, ShoppingCart, Menu, User } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Badge } from "@/components/ui/badge";
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { user, logout } = useAuth();
-  const router = useRouter();
   const pathname = usePathname();
   const { getCartCount } = useCart();
   const cartCount = getCartCount();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -52,161 +45,130 @@ export function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const navLinks = [
+    { href: "/", label: "Trang chủ", exact: true },
+    { href: "/shop", label: "Cửa hàng", exact: false },
+    { href: "/about", label: "Về chúng tôi", exact: false },
+  ] as const;
+
   return (
     <header
-      className={`sticky top-0 z-50 w-full transition-all duration-300 ${
+      className={`sticky top-0 z-50 w-full transition-all duration-300 border-b ${
         isScrolled
-          ? "bg-background/95 backdrop-blur-md shadow-sm supports-[backdrop-filter]:bg-background/60"
-          : "bg-white/95 backdrop-blur-md"
+          ? "bg-white/95 backdrop-blur-md shadow-sm border-gray-200"
+          : "bg-white border-transparent"
       }`}
     >
       <div className="container mx-auto px-4 md:px-6">
-        <div className="flex h-20 items-center justify-between">
-          {/* Left Section - Social Icons + Menu (Desktop) */}
-          <div className="flex items-center gap-4">
-            {/* Mobile Menu */}
+        {/* 3-column grid: logo | nav | icons */}
+        <div className="grid grid-cols-[1fr_auto_1fr] h-18 py-4 items-center">
+          {/* Left - Logo */}
+          <div className="flex items-center gap-3">
+            {/* Mobile hamburger */}
             <Sheet>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="md:hidden hover:bg-gray-100 rounded-full"
+                >
                   <Menu className="h-5 w-5" />
                   <span className="sr-only">Toggle menu</span>
                 </Button>
               </SheetTrigger>
               <SheetContent side="left">
                 <SheetHeader>
-                  <SheetTitle>Menu</SheetTitle>
+                  <SheetTitle className="text-xl font-bold">
+                    TrendVibe
+                  </SheetTitle>
                   <SheetDescription>
                     Khám phá cửa hàng của chúng tôi
                   </SheetDescription>
                 </SheetHeader>
-                <nav className="grid gap-4 py-6">
+                <nav className="grid gap-5 py-6">
+                  {navLinks.map(({ href, label }) => (
+                    <Link
+                      key={href}
+                      href={href}
+                      className="text-sm font-medium hover:text-gray-500 transition-colors"
+                    >
+                      {label}
+                    </Link>
+                  ))}
                   <Link
-                    href="/"
-                    className="text-sm font-medium hover:text-gray-600 transition-colors"
+                    href="/contact"
+                    className="text-sm font-medium hover:text-gray-500 transition-colors"
                   >
-                    Trang chủ
-                  </Link>
-                  <Link
-                    href="/shop"
-                    className="text-sm font-medium hover:text-gray-600 transition-colors"
-                  >
-                    Cửa hàng
-                  </Link>
-                  <Link
-                    href="/about"
-                    className="text-sm font-medium hover:text-gray-600 transition-colors"
-                  >
-                    Về chúng tôi
+                    Liên hệ
                   </Link>
                 </nav>
               </SheetContent>
             </Sheet>
 
-            {/* Social Icons - Desktop only */}
-            <div className="hidden md:flex items-center gap-3">
-              <Link
-                href="#"
-                className="w-9 h-9 rounded-full bg-black flex items-center justify-center hover:bg-gray-800 transition-all duration-300"
-              >
-                <Facebook
-                  className="h-3.5 w-3.5 text-white"
-                  fill="currentColor"
-                />
-              </Link>
-              <Link
-                href="#"
-                className="w-9 h-9 rounded-full bg-black flex items-center justify-center hover:bg-gray-800 transition-all duration-300"
-              >
-                <Instagram className="h-3.5 w-3.5 text-white" />
-              </Link>
-              <Link
-                href="#"
-                className="w-9 h-9 rounded-full bg-black flex items-center justify-center hover:bg-gray-800 transition-all duration-300"
-              >
-                <Youtube
-                  className="h-3.5 w-3.5 text-white"
-                  fill="currentColor"
-                />
-              </Link>
-            </div>
-
-            {/* Navigation Menu - Desktop */}
-            <nav className="hidden md:flex items-center gap-10 ml-10">
-              {(
-                [
-                  { href: "/", label: "Trang chủ", exact: true },
-                  { href: "/shop", label: "Cửa hàng", exact: false },
-                  { href: "/about", label: "Về chúng tôi", exact: false },
-                ] as { href: string; label: string; exact: boolean }[]
-              ).map(({ href, label, exact }) => {
-                const isActive = exact
-                  ? pathname === href
-                  : pathname.startsWith(href);
-                return (
-                  <Link
-                    key={href}
-                    href={href}
-                    className="relative text-[15px] font-normal tracking-wide hover:text-black transition-colors pb-1 group"
-                  >
-                    {label}
-                    <span
-                      className={`absolute bottom-0 left-0 h-0.5 bg-black transition-all duration-300 ${
-                        isActive ? "w-full" : "w-0 group-hover:w-full"
-                      }`}
-                    />
-                  </Link>
-                );
-              })}
-            </nav>
-          </div>
-
-          {/* Center - Logo */}
-          <Link
-            href="/"
-            className="absolute left-1/2 transform -translate-x-1/2 hover:opacity-80 transition-opacity"
-          >
-            <div className="text-center">
-              <h1 className="text-2xl md:text-3xl font-light tracking-wide">
+            {/* Logo - desktop */}
+            <Link href="/" className="hidden md:block group">
+              <h1 className="text-2xl md:text-3xl font-bold tracking-wide group-hover:opacity-75 transition-opacity">
                 TrendVibe
               </h1>
-              <p className="text-[10px] md:text-[11px] text-gray-400 uppercase tracking-[0.2em] mt-1">
+              <p className="text-[10px] text-gray-400 uppercase tracking-[0.25em] mt-0.5">
                 THEME
               </p>
-            </div>
-          </Link>
-
-          {/* Right Section - Icons */}
-          <div className="flex items-center gap-1 md:gap-2">
-            <Link
-              href="/contact"
-              className="hidden md:flex items-center text-[15px] font-normal tracking-wide hover:text-black transition-colors px-3 py-2"
-            >
-              Liên hệ
             </Link>
 
+            {/* Logo - mobile (centered via grid) */}
+            <Link href="/" className="md:hidden">
+              <h1 className="text-2xl font-bold tracking-wide">TrendVibe</h1>
+            </Link>
+          </div>
+
+          {/* Center - Navigation (desktop only) */}
+          <nav className="hidden md:flex items-center gap-10">
+            {navLinks.map(({ href, label, exact }) => {
+              const isActive = exact
+                ? pathname === href
+                : pathname.startsWith(href);
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className="relative text-[15px] font-normal tracking-wide text-gray-700 hover:text-black transition-colors pb-1 group"
+                >
+                  {label}
+                  <span
+                    className={`absolute bottom-0 left-0 h-[1.5px] bg-black transition-all duration-300 ${
+                      isActive ? "w-full" : "w-0 group-hover:w-full"
+                    }`}
+                  />
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Right - Action icons */}
+          <div className="flex items-center justify-end gap-1 md:gap-2">
             <Button
               variant="ghost"
               size="icon"
-              className="hover:bg-transparent hover:text-gray-900"
+              className="w-10 h-10 hover:bg-gray-100 hover:text-black transition-colors rounded-full"
             >
-              <Search className="h-5 w-5 md:h-6 md:w-6 stroke-[1.5]" />
+              <Search className="h-[18px] w-[18px] stroke-[1.5]" />
               <span className="sr-only">Tìm kiếm</span>
             </Button>
 
-            {/* Desktop: hiện dropdown khi đã đăng nhập, hiện link khi chưa */}
-            {user ? (
+            {/* User - desktop */}
+            {!mounted ? (
+              <div className="hidden md:block w-10 h-10" />
+            ) : user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
-                    className="hidden md:flex items-center gap-2 px-3 py-2 hover:bg-transparent hover:text-gray-900"
+                    size="icon"
+                    className="hidden md:flex w-10 h-10 hover:bg-gray-100 transition-colors rounded-full"
                   >
                     <div className="w-7 h-7 rounded-full bg-gray-900 text-white flex items-center justify-center text-xs font-medium">
                       {user.fullName?.charAt(0).toUpperCase() ?? "U"}
                     </div>
-                    <span className="text-[15px] font-normal tracking-wide max-w-[120px] truncate">
-                      {user.fullName}
-                    </span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
@@ -239,20 +201,21 @@ export function Header() {
             ) : (
               <Link
                 href="/login"
-                className="hidden md:flex items-center text-[15px] font-normal tracking-wide hover:text-black transition-colors px-3 py-2"
+                className="hidden md:flex items-center text-[14px] font-normal tracking-wide text-gray-700 hover:text-black transition-colors px-2 py-2 rounded-md hover:bg-gray-100"
               >
                 Đăng nhập
               </Link>
             )}
 
+            {/* User - mobile */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="md:hidden hover:bg-transparent hover:text-gray-900"
+                  className="md:hidden w-10 h-10 hover:bg-gray-100 transition-colors rounded-full"
                 >
-                  <User className="h-5 w-5 stroke-[1.5]" />
+                  <User className="h-[18px] w-[18px] stroke-[1.5]" />
                   <span className="sr-only">Tài khoản</span>
                 </Button>
               </DropdownMenuTrigger>
@@ -303,11 +266,9 @@ export function Header() {
             <Button
               variant="ghost"
               size="icon"
-              className="hover:bg-transparent hover:text-gray-900 relative"
+              className="w-10 h-10 hover:bg-gray-100 hover:text-black transition-colors rounded-full"
             >
-              <div className="relative">
-                <Heart className="h-5 w-5 md:h-6 md:w-6 stroke-[1.5]" />
-              </div>
+              <Heart className="h-[18px] w-[18px] stroke-[1.5]" />
               <span className="sr-only">Yêu thích</span>
             </Button>
 
@@ -315,16 +276,14 @@ export function Header() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="hover:bg-transparent hover:text-gray-900 relative"
+                className="w-10 h-10 hover:bg-gray-100 hover:text-black transition-colors rounded-full relative"
               >
-                <div className="relative">
-                  <ShoppingCart className="h-5 w-5 md:h-6 md:w-6 stroke-[1.5]" />
-                  {cartCount > 0 && (
-                    <span className="absolute -top-2 -right-2 h-4 w-4 flex items-center justify-center bg-black text-white text-[10px] font-medium rounded-full">
-                      {cartCount}
-                    </span>
-                  )}
-                </div>
+                <ShoppingCart className="h-[18px] w-[18px] stroke-[1.5]" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-black text-white text-[10px] font-semibold rounded-full leading-none">
+                    {cartCount > 99 ? "99+" : cartCount}
+                  </span>
+                )}
                 <span className="sr-only">Giỏ hàng</span>
               </Button>
             </Link>

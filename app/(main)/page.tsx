@@ -6,54 +6,16 @@ import { Package, Shield, RotateCcw, Headphones } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { getProducts, type Product } from "@/service/products";
+import { formatCurrency } from "@/lib/utils";
 
-const products = [
-  {
-    id: 1,
-    name: "10K Yellow Gold",
-    price: "2.299.000₫",
-    image:
-      "https://scontent.fhan14-5.fna.fbcdn.net/v/t39.30808-6/622131631_1350139390489716_6436140744286060367_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=13d280&_nc_eui2=AeGYpBTPYVVr5N3n41uFfBMxEuVMF43BURAS5UwXjcFREOWVEfj1m0mB8RYpZbn_isZlOBnlX-vukoZZR-2rCNS_&_nc_ohc=YF2qMfy_snQQ7kNvwHK88R5&_nc_oc=Adkzmim5GKpwb4DGiIlKtGB2i0I_1KBr5rmjUzQ5viASXnd7c895D_X5qepRLri1FZI&_nc_zt=23&_nc_ht=scontent.fhan14-5.fna&_nc_gid=1FFQa9pDVD79qi0TX-6yKA&oh=00_AftPd7TPKBsXv90Yi4ZkGtEgpNN6Ke5WP2m7rW4ESRbtiw&oe=69A37CE3",
-  },
-  {
-    id: 2,
-    name: "Consectetur nibh at",
-    price: "2.759.000₫",
-    image:
-      "https://scontent.fhan14-5.fna.fbcdn.net/v/t39.30808-6/635137841_2374025833046563_4495255480007630933_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=7b2446&_nc_eui2=AeGXwtAaCZqfzihrodxsZJcD0Un4zi44ac3RSfjOLjhpzb6s9hn5Mx1KW_hwIc4DHiqBdTbRjOgjZajCL-Vvbc7a&_nc_ohc=nDIwiCbtuhcQ7kNvwHs-PuE&_nc_oc=AdmTUuO8JyQBvnKjwzaWXZ4VNTm_s92XEbfp3qNVvIYfdzgSoljUBSPsNH5qOdxssFc&_nc_zt=23&_nc_ht=scontent.fhan14-5.fna&_nc_gid=mxjMKiGGWer81d8lutF7Hg&oh=00_AfsjA49PvaMcCjZ-eAFAJuGCWeEql2JBwpt2HJennTnNdA&oe=69A37EB6",
-  },
-  {
-    id: 3,
-    name: "Dignissim molestie",
-    price: "20.299.000₫",
-    image:
-      "https://images.unsplash.com/photo-1611312449408-fcece27cdbb7?w=600&q=80",
-  },
-  {
-    id: 4,
-    name: "Eget scelerisque",
-    price: "8.519.000₫",
-    image:
-      "https://images.unsplash.com/photo-1588117305388-c2631a279f82?w=600&q=80",
-  },
-  {
-    id: 5,
-    name: "Facilisi etiam",
-    price: "5.979.000₫",
-    image:
-      "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600&q=80",
-  },
-  {
-    id: 6,
-    name: "Gravida arcu ac",
-    price: "4.369.000₫",
-    image:
-      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80",
-  },
-];
+const FALLBACK_IMAGE =
+  "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80";
 
 export default function Home() {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [productsLoading, setProductsLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState({
     days: 129,
     hours: 1,
@@ -89,6 +51,13 @@ export default function Home() {
       });
     }, 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    getProducts({ isFeatured: true, limit: 6, status: "active" })
+      .then((res) => setFeaturedProducts((res?.hits as Product[]) ?? []))
+      .catch(() => {})
+      .finally(() => setProductsLoading(false));
   }, []);
 
   if (!isLoaded) {
@@ -347,64 +316,127 @@ export default function Home() {
 
               {/* Right - 2 product cards stacked */}
               <div className="grid grid-cols-2 gap-4">
-                {products.slice(0, 2).map((product, i) => (
-                  <motion.div
-                    key={product.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: i * 0.1 }}
-                    className="group cursor-pointer"
-                  >
-                    <div
-                      className="overflow-hidden"
-                      style={{ height: "230px" }}
-                    >
-                      <Image
-                        src={product.image}
-                        alt={product.name}
-                        width={600}
-                        height={230}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      />
-                    </div>
-                    <div className="pt-3">
-                      <h3 className="text-sm font-normal text-gray-800 mb-1">
-                        {product.name}
-                      </h3>
-                      <p className="text-sm text-gray-500">{product.price}</p>
-                    </div>
-                  </motion.div>
-                ))}
+                {productsLoading
+                  ? Array.from({ length: 2 }).map((_, i) => (
+                      <div key={i} className="animate-pulse">
+                        <div
+                          className="bg-gray-200"
+                          style={{ height: "230px" }}
+                        />
+                        <div className="pt-3 space-y-2">
+                          <div className="h-3 bg-gray-200 rounded w-3/4" />
+                          <div className="h-3 bg-gray-200 rounded w-1/2" />
+                        </div>
+                      </div>
+                    ))
+                  : featuredProducts.slice(0, 2).map((product, i) => {
+                      const thumb =
+                        product.thumbnail ||
+                        product.images?.[0] ||
+                        FALLBACK_IMAGE;
+                      const discounted =
+                        product.discount && product.discount > 0
+                          ? product.price * (1 - product.discount / 100)
+                          : null;
+                      return (
+                        <motion.div
+                          key={product._id}
+                          initial={{ opacity: 0, y: 20 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.5, delay: i * 0.1 }}
+                          className="group cursor-pointer"
+                        >
+                          <Link href={`/shop/${product._id}`}>
+                            <div
+                              className="overflow-hidden"
+                              style={{ height: "230px" }}
+                            >
+                              <Image
+                                src={thumb}
+                                alt={product.name}
+                                width={600}
+                                height={230}
+                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                unoptimized
+                              />
+                            </div>
+                            <div className="pt-3">
+                              <h3 className="text-sm font-normal text-gray-800 mb-1 line-clamp-1">
+                                {product.name}
+                              </h3>
+                              <p className="text-sm text-gray-500">
+                                {discounted
+                                  ? formatCurrency(discounted)
+                                  : formatCurrency(product.price)}
+                              </p>
+                            </div>
+                          </Link>
+                        </motion.div>
+                      );
+                    })}
               </div>
             </div>
 
             {/* Bottom Row: 4 Products */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {products.slice(2).map((product, i) => (
-                <motion.div
-                  key={product.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: i * 0.1 }}
-                  className="group cursor-pointer"
-                >
-                  <div className="overflow-hidden" style={{ height: "260px" }}>
-                    <Image
-                      src={product.image}
-                      alt={product.name}
-                      width={600}
-                      height={260}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  </div>
-                  <div className="pt-3">
-                    <h3 className="text-sm font-normal text-gray-800 mb-1">
-                      {product.name}
-                    </h3>
-                    <p className="text-sm text-gray-500">{product.price}</p>
-                  </div>
-                </motion.div>
-              ))}
+              {productsLoading
+                ? Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="animate-pulse">
+                      <div
+                        className="bg-gray-200"
+                        style={{ height: "260px" }}
+                      />
+                      <div className="pt-3 space-y-2">
+                        <div className="h-3 bg-gray-200 rounded w-3/4" />
+                        <div className="h-3 bg-gray-200 rounded w-1/2" />
+                      </div>
+                    </div>
+                  ))
+                : featuredProducts.slice(2, 6).map((product, i) => {
+                    const thumb =
+                      product.thumbnail ||
+                      product.images?.[0] ||
+                      FALLBACK_IMAGE;
+                    const discounted =
+                      product.discount && product.discount > 0
+                        ? product.price * (1 - product.discount / 100)
+                        : null;
+                    return (
+                      <motion.div
+                        key={product._id}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: i * 0.1 }}
+                        className="group cursor-pointer"
+                      >
+                        <Link href={`/shop/${product._id}`}>
+                          <div
+                            className="overflow-hidden"
+                            style={{ height: "260px" }}
+                          >
+                            <Image
+                              src={thumb}
+                              alt={product.name}
+                              width={600}
+                              height={260}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                              unoptimized
+                            />
+                          </div>
+                          <div className="pt-3">
+                            <h3 className="text-sm font-normal text-gray-800 mb-1 line-clamp-1">
+                              {product.name}
+                            </h3>
+                            <p className="text-sm text-gray-500">
+                              {discounted
+                                ? formatCurrency(discounted)
+                                : formatCurrency(product.price)}
+                            </p>
+                          </div>
+                        </Link>
+                      </motion.div>
+                    );
+                  })}
             </div>
           </div>
         </section>
