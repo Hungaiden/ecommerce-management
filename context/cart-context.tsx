@@ -46,16 +46,18 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 // Map từ backend CartItem sang CartItem của context
 const mapCartItems = (backendItems: BackendCartItem[]): CartItem[] => {
-  return backendItems.map((item) => ({
-    _id: item._id,
-    product_id: item.product_id._id,
-    name: item.product_id.title,
-    image: item.product_id.thumbnail,
-    price: item.product_id.price,
-    quantity: item.quantity,
-    size: item.size,
-    color: item.color,
-  }));
+  return backendItems
+    .filter((item) => item.product_id != null)
+    .map((item) => ({
+      _id: item._id,
+      product_id: item.product_id._id,
+      name: item.product_id.name,
+      image: item.product_id.thumbnail ?? "",
+      price: item.product_id.price,
+      quantity: item.quantity,
+      size: item.size,
+      color: item.color,
+    }));
 };
 
 export function CartProvider({ children }: { children: React.ReactNode }) {

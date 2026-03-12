@@ -60,8 +60,8 @@ export default function ProductDetailPage() {
         color: selectedColor || undefined,
       });
       toast.success("Đã thêm vào giỏ hàng!");
-    } catch {
-      toast.error("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.");
+    } catch (err: any) {
+      toast.error(err?.message || "Có lỗi xảy ra, vui lòng thử lại.");
     } finally {
       setIsAdding(false);
     }
@@ -78,8 +78,8 @@ export default function ProductDetailPage() {
         color: selectedColor || undefined,
       });
       router.push("/cart");
-    } catch {
-      toast.error("Vui lòng đăng nhập để mua sản phẩm.");
+    } catch (err: any) {
+      toast.error(err?.message || "Có lỗi xảy ra, vui lòng thử lại.");
     } finally {
       setIsAdding(false);
     }

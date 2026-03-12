@@ -2,229 +2,277 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCart } from "@/context/cart-context";
+import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
-import { CheckCircle2, CreditCard, Loader2 } from "lucide-react";
-import { CartSummary } from "@/components/cart/cart-summary";
+import { Banknote, Building2, Loader2, ShoppingBag } from "lucide-react";
+import { toast } from "sonner";
+import { createOrder } from "@/service/orders";
+import Image from "next/image";
 
 export default function CheckoutPage() {
   const { items, clearCart } = useCart();
+  const { user } = useAuth();
   const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isComplete, setIsComplete] = useState(false);
 
-  // Form states
-  const [paymentMethod, setPaymentMethod] = useState("credit-card");
+  // Contact form
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [address, setAddress] = useState("");
+  const [note, setNote] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<"cash" | "bank_transfer">(
+    "cash",
+  );
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Pre-fill from auth
+  useEffect(() => {
+    if (user) {
+      if (user.fullName) setName(user.fullName);
+      if (user.email) setEmail(user.email);
+    }
+  }, [user]);
+
+  // Redirect if empty cart (but not while processing payment)
+  useEffect(() => {
+    if (items.length === 0 && !isProcessing) {
+      router.replace("/cart");
+    }
+  }, [items, router, isProcessing]);
+
+  const totalPrice = items.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0,
+  );
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (items.length === 0) return;
     setIsProcessing(true);
+    try {
+      const order = await createOrder({
+        items: items.map((item) => ({
+          product_id: item.product_id,
+          name: item.name,
+          thumbnail: item.image,
+          price: item.price,
+          discount: 0,
+          size: item.size,
+          color: item.color,
+          quantity: item.quantity,
+          subtotal: item.price * item.quantity,
+        })),
+        contact_info: { name, phone, email, address },
+        note,
+        total_price: totalPrice,
+        payment_method: paymentMethod,
+      });
 
-    // Simulate payment processing
-    setTimeout(() => {
+      // Navigate first, then clear cart (to avoid empty-cart redirect firing before navigation)
+      if (paymentMethod === "bank_transfer") {
+        router.push(
+          `/checkout/bank-transfer?orderId=${order._id}&amount=${totalPrice}`,
+        );
+      } else {
+        router.push(`/checkout/success?orderId=${order._id}`);
+      }
+
+      clearCart().catch(() => {});
+    } catch (err: any) {
+      toast.error(
+        err?.response?.data?.message ?? "Đặt hàng thất bại. Vui lòng thử lại.",
+      );
+    } finally {
       setIsProcessing(false);
-      setIsComplete(true);
-      clearCart();
-
-      // Redirect to confirmation page after 2 seconds
-      setTimeout(() => {
-        router.push("/checkout/confirmation");
-      }, 2000);
-    }, 2000);
+    }
   };
 
-  // if (state.items.length === 0 && !isComplete) {
-  //     router.push("/cart");
-  //     return null;
-  // }
-
-  if (isComplete) {
-    return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <div className="mx-auto flex h-24 w-24 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/20">
-          <CheckCircle2 className="h-12 w-12 text-green-600 dark:text-green-500" />
-        </div>
-        <h1 className="mt-6 text-2xl font-bold">Thanh toán thành công!</h1>
-        <p className="mt-2 text-muted-foreground">
-          Đơn hàng của bạn đã được xử lý thành công.
-        </p>
-        <div className="mt-8">
-          <Button asChild size="lg">
-            <a href="/">Về trang chủ</a>
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  if (items.length === 0) return null;
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
       <h1 className="text-3xl font-bold mb-8">Thanh toán</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left: Form */}
         <div className="lg:col-span-2">
           <form onSubmit={handleSubmit}>
-            <div className="space-y-8">
-              {/* Customer Information */}
+            <div className="space-y-6">
+              {/* Contact info */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Thông tin khách hàng</CardTitle>
+                  <CardTitle>Thông tin liên hệ</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Họ và tên</Label>
+                    <Input
+                      id="name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      required
+                      placeholder="Nguyễn Văn A"
+                    />
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="firstName">Họ</Label>
-                      <Input id="firstName" required />
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        placeholder="example@email.com"
+                      />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="lastName">Tên</Label>
-                      <Input id="lastName" required />
+                      <Label htmlFor="phone">Số điện thoại</Label>
+                      <Input
+                        id="phone"
+                        type="tel"
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        required
+                        placeholder="0912345678"
+                      />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" required />
+                    <Label htmlFor="address">Địa chỉ giao hàng</Label>
+                    <Input
+                      id="address"
+                      value={address}
+                      onChange={(e) => setAddress(e.target.value)}
+                      required
+                      placeholder="Số nhà, đường, phường, quận, thành phố"
+                    />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Số điện thoại</Label>
-                    <Input id="phone" type="tel" required />
+                    <Label htmlFor="note">Ghi chú (tuỳ chọn)</Label>
+                    <Textarea
+                      id="note"
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                      placeholder="Ghi chú thêm cho đơn hàng..."
+                      rows={3}
+                    />
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Billing Address */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Địa chỉ giao hàng</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="address">Địa chỉ</Label>
-                    <Input id="address" required />
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="city">Thành phố</Label>
-                      <Input id="city" required />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="state">Tỉnh/Quận</Label>
-                      <Input id="state" required />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="zip">Mã bưu chính</Label>
-                      <Input id="zip" required />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="country">Quốc gia</Label>
-                      <Input id="country" required />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Payment Method */}
+              {/* Payment method */}
               <Card>
                 <CardHeader>
                   <CardTitle>Phương thức thanh toán</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <Tabs
-                    defaultValue="credit-card"
-                    onValueChange={setPaymentMethod}
+                  <RadioGroup
+                    value={paymentMethod}
+                    onValueChange={(v) =>
+                      setPaymentMethod(v as "cash" | "bank_transfer")
+                    }
+                    className="space-y-3"
                   >
-                    <TabsList className="grid w-full grid-cols-3">
-                      <TabsTrigger value="credit-card">
-                        Thẻ tín dụng
-                      </TabsTrigger>
-                      <TabsTrigger value="paypal">PayPal</TabsTrigger>
-                      <TabsTrigger value="bank-transfer">
-                        Chuyển khoản
-                      </TabsTrigger>
-                    </TabsList>
-
-                    <TabsContent value="credit-card" className="space-y-4 mt-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="cardName">Tên trên thẻ</Label>
-                        <Input
-                          id="cardName"
-                          required={paymentMethod === "credit-card"}
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="cardNumber">Số thẻ</Label>
-                        <Input
-                          id="cardNumber"
-                          placeholder="1234 5678 9012 3456"
-                          required={paymentMethod === "credit-card"}
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="expiry">Ngày hết hạn</Label>
-                          <Input
-                            id="expiry"
-                            placeholder="MM/YY"
-                            required={paymentMethod === "credit-card"}
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label htmlFor="cvc">Mã CVV/CVC</Label>
-                          <Input
-                            id="cvc"
-                            placeholder="123"
-                            required={paymentMethod === "credit-card"}
-                          />
-                        </div>
-                      </div>
-                    </TabsContent>
-
-                    <TabsContent value="paypal" className="mt-4">
-                      <div className="text-center p-4">
-                        <p className="mb-4">
-                          Bạn sẽ được chuyển đến PayPal để hoàn tất thanh toán.
-                        </p>
-                        <Button type="button" className="w-full">
-                          Tiếp tục với PayPal
-                        </Button>
-                      </div>
-                    </TabsContent>
-
-                    <TabsContent value="bank-transfer" className="mt-4">
-                      <div className="p-4 border rounded-md bg-muted">
-                        <h3 className="font-medium mb-2">
-                          Thông tin chuyển khoản
-                        </h3>
-                        <p className="text-sm mb-1">Ngân hàng: Vietcombank</p>
-                        <p className="text-sm mb-1">Tên tài khoản: TrendVibe</p>
-                        <p className="text-sm mb-1">Số tài khoản: 1234567890</p>
-                        <p className="text-sm mt-4">
-                          Vui lòng ghi mã đơn hàng vào nội dung chuyển khoản.
+                    <div
+                      className={`flex items-start gap-3 p-4 border rounded-lg cursor-pointer transition-colors ${paymentMethod === "cash" ? "border-primary bg-primary/5" : "border-border"}`}
+                      onClick={() => setPaymentMethod("cash")}
+                    >
+                      <RadioGroupItem
+                        value="cash"
+                        id="cash"
+                        className="mt-0.5"
+                      />
+                      <div className="flex-1">
+                        <Label
+                          htmlFor="cash"
+                          className="cursor-pointer flex items-center gap-2 font-medium"
+                        >
+                          <Banknote className="h-4 w-4" />
+                          Thanh toán khi nhận hàng (COD)
+                        </Label>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Thanh toán bằng tiền mặt khi nhận được hàng.
                         </p>
                       </div>
-                    </TabsContent>
-                  </Tabs>
+                    </div>
+
+                    <div
+                      className={`flex items-start gap-3 p-4 border rounded-lg cursor-pointer transition-colors ${paymentMethod === "bank_transfer" ? "border-primary bg-primary/5" : "border-border"}`}
+                      onClick={() => setPaymentMethod("bank_transfer")}
+                    >
+                      <RadioGroupItem
+                        value="bank_transfer"
+                        id="bank_transfer"
+                        className="mt-0.5"
+                      />
+                      <div className="flex-1">
+                        <Label
+                          htmlFor="bank_transfer"
+                          className="cursor-pointer flex items-center gap-2 font-medium"
+                        >
+                          <Building2 className="h-4 w-4" />
+                          Chuyển khoản ngân hàng
+                        </Label>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Chuyển khoản qua ngân hàng. Thông tin tài khoản sẽ
+                          hiển thị sau khi đặt hàng.
+                        </p>
+                      </div>
+                    </div>
+                  </RadioGroup>
                 </CardContent>
               </Card>
 
-              <div className="lg:hidden">
-                {/* <CartSummary
-                                    subtotal={items.subtotal}
-                                    tax={items.tax}
-                                    shipping={items.shipping}
-                                    total={items.total}
-                                    onCheckout={() => {}}
-                                    isProcessing={false}
-                                /> */}
-              </div>
+              {/* Mobile order summary */}
+              <Card className="lg:hidden">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <ShoppingBag className="h-4 w-4" />
+                    Đơn hàng ({items.length} sản phẩm)
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {items.map((item) => (
+                    <div key={item._id} className="flex items-center gap-3">
+                      <div className="relative h-12 w-12 rounded overflow-hidden bg-muted flex-shrink-0">
+                        <Image
+                          src={item.image}
+                          alt={item.name}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">
+                          {item.name}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {item.size && `Size: ${item.size}`}
+                          {item.color && ` / ${item.color}`} × {item.quantity}
+                        </p>
+                      </div>
+                      <span className="text-sm font-medium whitespace-nowrap">
+                        {(item.price * item.quantity).toLocaleString("vi-VN")}₫
+                      </span>
+                    </div>
+                  ))}
+                  <Separator />
+                  <div className="flex justify-between font-semibold">
+                    <span>Tổng cộng</span>
+                    <span>{totalPrice.toLocaleString("vi-VN")}₫</span>
+                  </div>
+                </CardContent>
+              </Card>
 
               <Button
                 type="submit"
@@ -237,10 +285,15 @@ export default function CheckoutPage() {
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Đang xử lý...
                   </>
+                ) : paymentMethod === "bank_transfer" ? (
+                  <>
+                    <Building2 className="mr-2 h-4 w-4" />
+                    Đặt hàng &amp; Xem thông tin chuyển khoản
+                  </>
                 ) : (
                   <>
-                    <CreditCard className="mr-2 h-4 w-4" />
-                    Thanh toán ngay
+                    <Banknote className="mr-2 h-4 w-4" />
+                    Đặt hàng (COD)
                   </>
                 )}
               </Button>
@@ -248,36 +301,60 @@ export default function CheckoutPage() {
           </form>
         </div>
 
+        {/* Right: Order summary */}
         <div className="hidden lg:block">
-          {/* <CartSummary
-            subtotal={items.subtotal}
-            tax={items.tax}
-            shipping={items.shipping}
-            total={items.total}
-            onCheckout={() => {}}
-            isProcessing={false}
-          /> */}
-
-          <Card className="mt-6">
+          <Card className="sticky top-4">
             <CardHeader>
-              <CardTitle className="text-sm">
-                Sản phẩm ({items.length})
+              <CardTitle className="flex items-center gap-2">
+                <ShoppingBag className="h-4 w-4" />
+                Đơn hàng ({items.length} sản phẩm)
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3">
-              {items.map((item) => (
-                <div key={item._id} className="flex justify-between text-sm">
-                  <span className="flex-1 truncate">
-                    {item.name}
-                    <span className="text-muted-foreground ml-1">
-                      x{item.quantity}
+            <CardContent className="space-y-4">
+              <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
+                {items.map((item) => (
+                  <div key={item._id} className="flex items-center gap-3">
+                    <div className="relative h-12 w-12 rounded overflow-hidden bg-muted flex-shrink-0">
+                      <Image
+                        src={item.image}
+                        alt={item.name}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">
+                        {item.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        {item.size && `Size: ${item.size}`}
+                        {item.color && ` / ${item.color}`} × {item.quantity}
+                      </p>
+                    </div>
+                    <span className="text-sm font-medium whitespace-nowrap">
+                      {(item.price * item.quantity).toLocaleString("vi-VN")}₫
                     </span>
-                  </span>
-                  <span>
-                    {(item.price * item.quantity).toLocaleString("vi-VN")}₫
-                  </span>
+                  </div>
+                ))}
+              </div>
+              <Separator />
+              <div className="space-y-1 text-sm">
+                <div className="flex justify-between text-muted-foreground">
+                  <span>Tạm tính</span>
+                  <span>{totalPrice.toLocaleString("vi-VN")}₫</span>
                 </div>
-              ))}
+                <div className="flex justify-between text-muted-foreground">
+                  <span>Phí vận chuyển</span>
+                  <span>Miễn phí</span>
+                </div>
+              </div>
+              <Separator />
+              <div className="flex justify-between font-semibold text-base">
+                <span>Tổng cộng</span>
+                <span className="text-primary">
+                  {totalPrice.toLocaleString("vi-VN")}₫
+                </span>
+              </div>
             </CardContent>
           </Card>
         </div>

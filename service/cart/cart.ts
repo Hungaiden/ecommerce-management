@@ -2,7 +2,7 @@ import http from "@/service/http";
 
 export interface CartItemProduct {
   _id: string;
-  title: string;
+  name: string;
   price: number;
   thumbnail: string;
   stock: number;

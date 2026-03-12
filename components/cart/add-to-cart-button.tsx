@@ -34,10 +34,10 @@ export function AddToCartButton({
         description: "Sản phẩm đã được thêm vào giỏ hàng của bạn.",
         duration: 3000,
       });
-    } catch {
+    } catch (err: any) {
       toast({
         title: "Thêm thất bại",
-        description: "Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.",
+        description: err?.message || "Có lỗi xảy ra, vui lòng thử lại.",
         variant: "destructive",
         duration: 3000,
       });
