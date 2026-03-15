@@ -16,8 +16,8 @@ import { useState } from "react";
 import { SuccessModal } from "./success-modal";
 import { createBooking, BookingTourRequest } from "@/service/tours";
 import { toast } from "sonner";
-import http from "@/service/http";
 import { useAuth } from "@/context/AuthContext";
+import http from "@/service/http";
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -48,7 +48,6 @@ export function BookingModal({
 
   const { user } = useAuth();
 
-  console.log("tourPrice", tourPrice);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
   const [bookingId, setBookingId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -77,8 +76,6 @@ export function BookingModal({
         note: formData.note,
         total_price: tourPrice * travelers,
       };
-
-      console.log("Booking data:", bookingData);
 
       const res = await createBooking(bookingData);
       setBookingId(res.data._id);

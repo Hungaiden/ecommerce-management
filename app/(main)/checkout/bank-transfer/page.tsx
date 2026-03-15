@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -9,10 +9,11 @@ import { Badge } from "@/components/ui/badge";
 import { Building2, CheckCircle2, Copy, Home, Package } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
+import Image from "next/image";
 
-const BANK_NAME = "Vietcombank";
-const BANK_ACCOUNT = "1234567890";
-const BANK_ACCOUNT_NAME = "TRENDVIBE SHOP";
+const BANK_NAME = "MB Bank";
+const BANK_ACCOUNT = "0151052219999";
+const BANK_ACCOUNT_NAME = "BUI DUC HUNG";
 
 function BankTransferContent() {
   const searchParams = useSearchParams();
@@ -20,6 +21,13 @@ function BankTransferContent() {
   const orderId = searchParams.get("orderId") ?? "";
   const amount = Number(searchParams.get("amount") ?? 0);
   const transferContent = `ORDER ${orderId.toUpperCase()}`;
+  const qrCodeUrl = `https://img.vietqr.io/image/MB-${BANK_ACCOUNT}-compact2.png?amount=${encodeURIComponent(amount.toString())}&addInfo=${encodeURIComponent(transferContent)}&accountName=${encodeURIComponent(BANK_ACCOUNT_NAME)}`;
+
+  useEffect(() => {
+    if (!orderId) {
+      router.replace("/");
+    }
+  }, [orderId, router]);
 
   const copyText = (text: string, label: string) => {
     navigator.clipboard.writeText(text).then(() => {
@@ -27,10 +35,7 @@ function BankTransferContent() {
     });
   };
 
-  if (!orderId) {
-    router.replace("/");
-    return null;
-  }
+  if (!orderId) return null;
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-2xl">
@@ -108,6 +113,27 @@ function BankTransferContent() {
               </Button>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-lg">Mã QR thanh toán</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="mx-auto w-full max-w-sm rounded-xl border bg-rose-50 p-3">
+            <Image
+              src={qrCodeUrl}
+              alt="QR chuyển khoản MB Bank"
+              width={420}
+              height={420}
+              className="h-auto w-full rounded-md"
+              priority
+            />
+          </div>
+          <p className="mt-3 text-center text-sm text-muted-foreground">
+            Quét mã QR để chuyển khoản nhanh đúng số tiền và nội dung.
+          </p>
         </CardContent>
       </Card>
 

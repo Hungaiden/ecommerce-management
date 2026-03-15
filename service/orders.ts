@@ -24,21 +24,48 @@ export interface CreateOrderPayload {
   contact_info: ContactInfo;
   note?: string;
   total_price: number;
-  payment_method: "cash" | "bank_transfer";
+  payment_method: "cash" | "bank_transfer" | "vnpay";
 }
+
+export type OrderStatus =
+  | "pending"
+  | "confirmed"
+  | "shipping"
+  | "delivered"
+  | "cancelled";
+
+export type PaymentStatus = "pending" | "paid" | "failed" | "refunded";
+
+export type PaymentMethod = "vnpay" | "momo" | "cash" | "bank_transfer";
 
 export interface Order {
   _id: string;
-  order_code: string;
+  order_code?: string;
   user_id: string;
   items: OrderItem[];
   contact_info: ContactInfo;
   note?: string;
   total_price: number;
-  payment_method: string;
-  payment_status: string;
-  status: string;
+  payment_method: PaymentMethod;
+  payment_status: PaymentStatus;
+  status: OrderStatus;
   createdAt: string;
+  updatedAt?: string;
+}
+
+export interface GetMyOrdersParams {
+  offset?: number;
+  limit?: number;
+  sortBy?: string;
+  sortType?: "asc" | "desc";
+}
+
+export interface MyOrdersResponse {
+  hits: Order[];
+  pagination: {
+    totalRows: number;
+    totalPages: number;
+  };
 }
 
 export const createOrder = async (
@@ -48,5 +75,15 @@ export const createOrder = async (
     "/products/bookings/create",
     payload,
   );
+  return response.data.data;
+};
+
+export const getMyOrders = async (
+  userId: string,
+  params?: GetMyOrdersParams,
+): Promise<MyOrdersResponse> => {
+  const response = await http.get(`/products/bookings/user/${userId}`, {
+    params,
+  });
   return response.data.data;
 };

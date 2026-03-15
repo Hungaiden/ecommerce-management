@@ -13,9 +13,16 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
-import { Banknote, Building2, Loader2, ShoppingBag } from "lucide-react";
+import {
+  Banknote,
+  Building2,
+  Loader2,
+  ShoppingBag,
+  Wallet,
+} from "lucide-react";
 import { toast } from "sonner";
 import { createOrder } from "@/service/orders";
+import { createVNPayPaymentUrl } from "@/service/payment";
 import Image from "next/image";
 
 export default function CheckoutPage() {
@@ -23,6 +30,7 @@ export default function CheckoutPage() {
   const { user } = useAuth();
   const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isOrderPlaced, setIsOrderPlaced] = useState(false);
 
   // Contact form
   const [name, setName] = useState("");
@@ -30,9 +38,9 @@ export default function CheckoutPage() {
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
   const [note, setNote] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<"cash" | "bank_transfer">(
-    "cash",
-  );
+  const [paymentMethod, setPaymentMethod] = useState<
+    "cash" | "bank_transfer" | "vnpay"
+  >("cash");
 
   // Pre-fill from auth
   useEffect(() => {
@@ -42,12 +50,12 @@ export default function CheckoutPage() {
     }
   }, [user]);
 
-  // Redirect if empty cart (but not while processing payment)
+  // Redirect if empty cart (but not while processing or right after placing an order)
   useEffect(() => {
-    if (items.length === 0 && !isProcessing) {
+    if (items.length === 0 && !isProcessing && !isOrderPlaced) {
       router.replace("/cart");
     }
-  }, [items, router, isProcessing]);
+  }, [items, router, isProcessing, isOrderPlaced]);
 
   const totalPrice = items.reduce(
     (sum, item) => sum + item.price * item.quantity,
@@ -77,13 +85,39 @@ export default function CheckoutPage() {
         payment_method: paymentMethod,
       });
 
+      const orderId = order?._id;
+      if (!orderId) {
+        throw new Error("Không thể lấy mã đơn hàng sau khi thanh toán.");
+      }
+
+      setIsOrderPlaced(true);
+
+      if (paymentMethod === "vnpay") {
+        try {
+          const paymentUrl = await createVNPayPaymentUrl(orderId);
+          clearCart().catch(() => {});
+          window.location.assign(paymentUrl);
+          return;
+        } catch {
+          toast.error(
+            "Don hang da tao nhung khong lay duoc link VNPay. Vui long vao Don hang cua toi de xu ly tiep.",
+          );
+          router.push("/bookings");
+          return;
+        }
+      }
+
       // Navigate first, then clear cart (to avoid empty-cart redirect firing before navigation)
       if (paymentMethod === "bank_transfer") {
+        toast.success(
+          "Đặt hàng thành công. Vui lòng chuyển khoản để xác nhận.",
+        );
         router.push(
-          `/checkout/bank-transfer?orderId=${order._id}&amount=${totalPrice}`,
+          `/checkout/bank-transfer?orderId=${encodeURIComponent(orderId)}&amount=${encodeURIComponent(totalPrice.toString())}`,
         );
       } else {
-        router.push(`/checkout/success?orderId=${order._id}`);
+        toast.success("Đặt hàng COD thành công!");
+        router.push(`/checkout/success?orderId=${encodeURIComponent(orderId)}`);
       }
 
       clearCart().catch(() => {});
@@ -96,7 +130,7 @@ export default function CheckoutPage() {
     }
   };
 
-  if (items.length === 0) return null;
+  if (items.length === 0 && !isOrderPlaced) return null;
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
@@ -179,7 +213,7 @@ export default function CheckoutPage() {
                   <RadioGroup
                     value={paymentMethod}
                     onValueChange={(v) =>
-                      setPaymentMethod(v as "cash" | "bank_transfer")
+                      setPaymentMethod(v as "cash" | "bank_transfer" | "vnpay")
                     }
                     className="space-y-3"
                   >
@@ -202,6 +236,30 @@ export default function CheckoutPage() {
                         </Label>
                         <p className="text-sm text-muted-foreground mt-1">
                           Thanh toán bằng tiền mặt khi nhận được hàng.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div
+                      className={`flex items-start gap-3 p-4 border rounded-lg cursor-pointer transition-colors ${paymentMethod === "vnpay" ? "border-primary bg-primary/5" : "border-border"}`}
+                      onClick={() => setPaymentMethod("vnpay")}
+                    >
+                      <RadioGroupItem
+                        value="vnpay"
+                        id="vnpay"
+                        className="mt-0.5"
+                      />
+                      <div className="flex-1">
+                        <Label
+                          htmlFor="vnpay"
+                          className="cursor-pointer flex items-center gap-2 font-medium"
+                        >
+                          <Wallet className="h-4 w-4" />
+                          Thanh toan VNPay
+                        </Label>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Thanh toan online qua cong VNPay, ho tro app ngan hang
+                          va the noi dia.
                         </p>
                       </div>
                     </div>
@@ -289,6 +347,11 @@ export default function CheckoutPage() {
                   <>
                     <Building2 className="mr-2 h-4 w-4" />
                     Đặt hàng &amp; Xem thông tin chuyển khoản
+                  </>
+                ) : paymentMethod === "vnpay" ? (
+                  <>
+                    <Wallet className="mr-2 h-4 w-4" />
+                    Dat hang &amp; Thanh toan VNPay
                   </>
                 ) : (
                   <>
