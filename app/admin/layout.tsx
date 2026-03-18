@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { AdminSidebar } from "@/components/admin/sidebar";
-import { Toaster } from "sonner";
 
 export default function AdminLayout({
   children,
@@ -35,7 +34,6 @@ export default function AdminLayout({
       <div className="flex flex-1 flex-col overflow-hidden">
         <main className="flex-1 overflow-y-auto">{children}</main>
       </div>
-      <Toaster richColors position="top-right" />
     </div>
   );
 }

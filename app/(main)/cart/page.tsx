@@ -55,9 +55,6 @@ export default function CartPage() {
 
         <div className="lg:col-span-1">
           <CartSummary />
-          <Button className="w-full mt-4" size="lg" asChild>
-            <Link href="/checkout">Tiến hành thanh toán</Link>
-          </Button>
         </div>
       </div>
     </div>

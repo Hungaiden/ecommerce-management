@@ -12,6 +12,7 @@ import {
   ChevronRight,
   ShoppingCart,
   Users,
+  Mail,
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -58,6 +59,11 @@ const navItems: NavItem[] = [
     label: "Tài khoản",
     href: "/admin/accounts",
     icon: <Users className="h-5 w-5" />,
+  },
+  {
+    label: "Newsletter",
+    href: "/admin/newsletter",
+    icon: <Mail className="h-5 w-5" />,
   },
 ];
 

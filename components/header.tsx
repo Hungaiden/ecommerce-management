@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/sheet";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/cart-context";
-import { Search, Heart, ShoppingCart, Menu, User } from "lucide-react";
+import { ShoppingCart, Menu, User } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -146,15 +146,6 @@ export function Header() {
 
           {/* Right - Action icons */}
           <div className="flex items-center justify-end gap-1 md:gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="w-10 h-10 hover:bg-gray-100 hover:text-black transition-colors rounded-full"
-            >
-              <Search className="h-[18px] w-[18px] stroke-[1.5]" />
-              <span className="sr-only">Tìm kiếm</span>
-            </Button>
-
             {/* User - desktop */}
             {!mounted ? (
               <div className="hidden md:block w-10 h-10" />
@@ -263,6 +254,7 @@ export function Header() {
               </DropdownMenuContent>
             </DropdownMenu>
 
+            {/*
             <Button
               variant="ghost"
               size="icon"
@@ -271,6 +263,7 @@ export function Header() {
               <Heart className="h-[18px] w-[18px] stroke-[1.5]" />
               <span className="sr-only">Yêu thích</span>
             </Button>
+            */}
 
             <Link href="/cart">
               <Button

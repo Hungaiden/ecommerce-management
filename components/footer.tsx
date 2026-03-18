@@ -1,5 +1,10 @@
+"use client";
+
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { subscribeNewsletter } from "@/service/newsletter";
+import { toast } from "sonner";
 import {
   Facebook,
   Instagram,
@@ -12,6 +17,32 @@ import {
 import Link from "next/link";
 
 export function Footer() {
+  const [email, setEmail] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubscribe = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const normalized = email.trim();
+    if (!normalized) {
+      toast.error("Vui lòng nhập email");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await subscribeNewsletter(normalized);
+      setEmail("");
+      toast.success("Đăng ký nhận bản tin thành công");
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.message || "Không thể đăng ký nhận bản tin",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <footer className="bg-white border-t">
       <div className="container mx-auto px-4 md:px-6 py-16">
@@ -28,14 +59,23 @@ export function Footer() {
               Khám phá xu hướng thời trang mới nhất. Đăng ký nhận bản tin để
               nhận ưu đãi độc quyền và cập nhật mới.
             </p>
-            <div className="flex gap-2">
+            <form className="flex gap-2" onSubmit={handleSubscribe}>
               <Input
                 type="email"
                 placeholder="Nhập email của bạn"
                 className="max-w-xs"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                disabled={isSubmitting}
               />
-              <Button className="bg-gray-900 hover:bg-gray-800">Đăng ký</Button>
-            </div>
+              <Button
+                className="bg-gray-900 hover:bg-gray-800"
+                disabled={isSubmitting}
+                type="submit"
+              >
+                {isSubmitting ? "Đang gửi..." : "Đăng ký"}
+              </Button>
+            </form>
             <div className="flex gap-4 pt-4">
               <Link
                 href="#"

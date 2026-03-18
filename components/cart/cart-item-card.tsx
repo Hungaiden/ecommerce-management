@@ -13,6 +13,7 @@ interface CartItemCardProps {
 
 export function CartItemCard({ item }: CartItemCardProps) {
   const { updateQuantity, removeItem } = useCart();
+  const imageSrc = item.image?.trim() ? item.image : "/placeholder.svg";
 
   const handleIncreaseQuantity = () => {
     updateQuantity(item._id, item.quantity + 1);
@@ -32,7 +33,7 @@ export function CartItemCard({ item }: CartItemCardProps) {
     <div className="flex flex-col sm:flex-row border rounded-lg overflow-hidden bg-card border-ocean-100 transition-all duration-300 hover:shadow-md group">
       <div className="relative w-full sm:w-48 h-48">
         <Image
-          src={item.image || "/placeholder.svg"}
+          src={imageSrc}
           alt={item.name}
           fill
           className="object-cover transition-transform duration-500 group-hover:scale-105"

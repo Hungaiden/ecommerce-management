@@ -48,16 +48,21 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 const mapCartItems = (backendItems: BackendCartItem[]): CartItem[] => {
   return backendItems
     .filter((item) => item.product_id != null)
-    .map((item) => ({
-      _id: item._id,
-      product_id: item.product_id._id,
-      name: item.product_id.name,
-      image: item.product_id.thumbnail ?? "",
-      price: item.product_id.price,
-      quantity: item.quantity,
-      size: item.size,
-      color: item.color,
-    }));
+    .map((item) => {
+      const thumbnail = item.product_id.thumbnail?.trim?.() || "";
+      const firstImage = item.product_id.images?.[0]?.trim?.() || "";
+
+      return {
+        _id: item._id,
+        product_id: item.product_id._id,
+        name: item.product_id.name,
+        image: thumbnail || firstImage,
+        price: item.product_id.price,
+        quantity: item.quantity,
+        size: item.size,
+        color: item.color,
+      };
+    });
 };
 
 export function CartProvider({ children }: { children: React.ReactNode }) {

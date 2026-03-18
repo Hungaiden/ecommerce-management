@@ -1,10 +1,18 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { Grid, List, ChevronLeft, ChevronRight, Tag } from "lucide-react";
+import {
+  Grid,
+  List,
+  ChevronLeft,
+  ChevronRight,
+  Tag,
+  Search,
+} from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import {
   Select,
@@ -15,6 +23,8 @@ import {
 } from "@/components/ui/select";
 import { getProducts, type Product } from "@/service/products";
 import { getCategories, type Category } from "@/service/admin/categories";
+import { useCart } from "@/context/cart-context";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 const FALLBACK_IMAGE =
@@ -34,6 +44,10 @@ export default function ShopPage() {
   const [sortBy, setSortBy] = useState("default");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [categories, setCategories] = useState<Category[]>([]);
+  const [searchInput, setSearchInput] = useState("");
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [addingProductId, setAddingProductId] = useState<string | null>(null);
+  const { addItem } = useCart();
 
   const totalPages = Math.max(1, Math.ceil(totalRows / PAGE_SIZE));
 
@@ -65,11 +79,14 @@ export default function ShopPage() {
     setLoading(true);
     try {
       const sort = getSortParams(sortBy);
+      const trimmedKeyword = searchKeyword.trim();
       const result = await getProducts({
         offset: (page - 1) * PAGE_SIZE,
         limit: PAGE_SIZE,
         status: "active",
         category: selectedCategory === "all" ? undefined : selectedCategory,
+        keyword: trimmedKeyword || undefined,
+        field: trimmedKeyword ? "name" : undefined,
         ...sort,
       });
       setProducts((result?.hits as Product[]) ?? []);
@@ -79,7 +96,7 @@ export default function ShopPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, sortBy, selectedCategory]);
+  }, [page, sortBy, selectedCategory, searchKeyword]);
 
   useEffect(() => {
     fetchProducts();
@@ -95,8 +112,44 @@ export default function ShopPage() {
     setPage(1);
   };
 
+  const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setPage(1);
+    setSearchKeyword(searchInput.trim());
+  };
+
+  const clearSearch = () => {
+    setSearchInput("");
+    setSearchKeyword("");
+    setPage(1);
+  };
+
   const handleSizeSelect = (productId: string, size: string) => {
     setSelectedSize((prev) => ({ ...prev, [productId]: size }));
+  };
+
+  const handleAddToCart = async (product: Product) => {
+    if (!product?._id || product.status === "out_of_stock") return;
+
+    const size = selectedSize[product._id] || product.sizes?.[0] || "";
+    const color = product.colors?.[0] || "";
+
+    setAddingProductId(product._id);
+    try {
+      await addItem({
+        product_id: product._id,
+        quantity: 1,
+        size: size || undefined,
+        color: color || undefined,
+      });
+      toast.success("Đã thêm vào giỏ hàng!");
+    } catch (err: any) {
+      toast.error(err?.message || "Có lỗi xảy ra, vui lòng thử lại.");
+    } finally {
+      setAddingProductId((current) =>
+        current === product._id ? null : current,
+      );
+    }
   };
 
   return (
@@ -104,49 +157,88 @@ export default function ShopPage() {
       {/* Toolbar */}
       <div className="border-b bg-gray-50 py-4">
         <div className="container mx-auto px-4 md:px-6">
-          <div className="flex items-center justify-between">
-            {/* Sort */}
-            <div className="flex items-center gap-2">
-              <Select value={sortBy} onValueChange={handleSortChange}>
-                <SelectTrigger className="w-[200px] bg-white">
-                  <SelectValue placeholder="Sắp xếp mặc định" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="default">Sắp xếp mặc định</SelectItem>
-                  <SelectItem value="rating">Theo đánh giá</SelectItem>
-                  <SelectItem value="latest">Mới nhất</SelectItem>
-                  <SelectItem value="price-low">Giá: thấp đến cao</SelectItem>
-                  <SelectItem value="price-high">Giá: cao đến thấp</SelectItem>
-                </SelectContent>
-              </Select>
-
-              {/* View Mode */}
-              <div className="flex gap-1 ml-2">
-                <Button
-                  variant={viewMode === "grid" ? "default" : "outline"}
-                  size="icon"
-                  onClick={() => setViewMode("grid")}
-                  className="h-9 w-9"
-                >
-                  <Grid className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === "list" ? "default" : "outline"}
-                  size="icon"
-                  onClick={() => setViewMode("list")}
-                  className="h-9 w-9"
-                >
-                  <List className="h-4 w-4" />
-                </Button>
+          <div className="space-y-3">
+            <form
+              onSubmit={handleSearchSubmit}
+              className="flex flex-col gap-2 sm:flex-row sm:items-center"
+            >
+              <div className="relative w-full sm:max-w-md">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                <Input
+                  value={searchInput}
+                  onChange={(event) => setSearchInput(event.target.value)}
+                  placeholder="Tìm theo tên sản phẩm..."
+                  className="pl-9 bg-white"
+                />
               </div>
-            </div>
+              <div className="flex items-center gap-2">
+                <Button type="submit" variant="outline" className="bg-white">
+                  Tìm kiếm
+                </Button>
+                {searchKeyword && (
+                  <Button type="button" variant="ghost" onClick={clearSearch}>
+                    Xóa lọc
+                  </Button>
+                )}
+              </div>
+            </form>
 
-            {/* Count */}
-            <span className="text-sm text-gray-500">
-              {totalRows > 0
-                ? `${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, totalRows)} / ${totalRows} sản phẩm`
-                : "0 sản phẩm"}
-            </span>
+            {searchKeyword && (
+              <p className="text-sm text-gray-500">
+                Kết quả cho từ khóa: "
+                <span className="font-medium text-gray-700">
+                  {searchKeyword}
+                </span>
+                "
+              </p>
+            )}
+
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              {/* Sort */}
+              <div className="flex items-center gap-2">
+                <Select value={sortBy} onValueChange={handleSortChange}>
+                  <SelectTrigger className="w-[200px] bg-white">
+                    <SelectValue placeholder="Sắp xếp mặc định" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="default">Sắp xếp mặc định</SelectItem>
+                    <SelectItem value="rating">Theo đánh giá</SelectItem>
+                    <SelectItem value="latest">Mới nhất</SelectItem>
+                    <SelectItem value="price-low">Giá: thấp đến cao</SelectItem>
+                    <SelectItem value="price-high">
+                      Giá: cao đến thấp
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {/* View Mode */}
+                <div className="flex gap-1 ml-2">
+                  <Button
+                    variant={viewMode === "grid" ? "default" : "outline"}
+                    size="icon"
+                    onClick={() => setViewMode("grid")}
+                    className="h-9 w-9"
+                  >
+                    <Grid className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant={viewMode === "list" ? "default" : "outline"}
+                    size="icon"
+                    onClick={() => setViewMode("list")}
+                    className="h-9 w-9"
+                  >
+                    <List className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {/* Count */}
+              <span className="text-sm text-gray-500">
+                {totalRows > 0
+                  ? `${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, totalRows)} / ${totalRows} sản phẩm`
+                  : "0 sản phẩm"}
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -348,9 +440,15 @@ export default function ShopPage() {
                             <Button
                               className="w-full bg-gray-900 hover:bg-gray-800 text-white font-medium"
                               size="lg"
-                              disabled={product.status === "out_of_stock"}
+                              disabled={
+                                product.status === "out_of_stock" ||
+                                addingProductId === product._id
+                              }
+                              onClick={() => handleAddToCart(product)}
                             >
-                              THÊM VÀO GIỎ
+                              {addingProductId === product._id
+                                ? "ĐANG THÊM..."
+                                : "THÊM VÀO GIỎ"}
                             </Button>
                           </div>
                         </div>
@@ -403,9 +501,15 @@ export default function ShopPage() {
                             </div>
                             <Button
                               className="w-fit bg-gray-900 hover:bg-gray-800 text-white"
-                              disabled={product.status === "out_of_stock"}
+                              disabled={
+                                product.status === "out_of_stock" ||
+                                addingProductId === product._id
+                              }
+                              onClick={() => handleAddToCart(product)}
                             >
-                              THÊM VÀO GIỎ
+                              {addingProductId === product._id
+                                ? "ĐANG THÊM..."
+                                : "THÊM VÀO GIỎ"}
                             </Button>
                           </div>
                         </div>

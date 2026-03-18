@@ -35,14 +35,16 @@ const formatCurrency = (value: number) =>
   );
 
 const BOOKING_COLORS = {
-  completed: "#22c55e",
   pending: "#f59e0b",
+  processing: "#3b82f6",
+  delivered: "#22c55e",
   cancelled: "#ef4444",
 };
 
 const PRODUCT_COLORS = {
   active: "#6366f1",
   inactive: "#94a3b8",
+  outOfStock: "#f97316",
 };
 
 function StatCard({
@@ -94,17 +96,27 @@ export default function AdminDashboardPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  const bookingProcessing = data
+    ? data.totalBooking.confirmed + data.totalBooking.shipping
+    : 0;
+  const bookingDelivered = data ? data.totalBooking.delivered : 0;
+
   const bookingChartData = data
     ? [
-        {
-          name: "Hoàn thành",
-          value: data.totalBooking.completed,
-          fill: BOOKING_COLORS.completed,
-        },
         {
           name: "Chờ xử lý",
           value: data.totalBooking.pending,
           fill: BOOKING_COLORS.pending,
+        },
+        {
+          name: "Đang xử lý",
+          value: bookingProcessing,
+          fill: BOOKING_COLORS.processing,
+        },
+        {
+          name: "Đã giao",
+          value: bookingDelivered,
+          fill: BOOKING_COLORS.delivered,
         },
         {
           name: "Đã huỷ",
@@ -126,6 +138,11 @@ export default function AdminDashboardPage() {
           value: data.totalProduct.inactive,
           fill: PRODUCT_COLORS.inactive,
         },
+        {
+          name: "Hết hàng",
+          value: data.totalProduct.out_of_stock,
+          fill: PRODUCT_COLORS.outOfStock,
+        },
       ]
     : [];
 
@@ -133,7 +150,8 @@ export default function AdminDashboardPage() {
     ? [
         {
           name: "Đơn hàng",
-          "Hoàn thành": data.totalBooking.completed,
+          "Đã giao": bookingDelivered,
+          "Đang xử lý": bookingProcessing,
           "Chờ xử lý": data.totalBooking.pending,
           "Đã huỷ": data.totalBooking.cancelled,
         },
@@ -141,6 +159,7 @@ export default function AdminDashboardPage() {
           name: "Sản phẩm",
           "Đang bán": data.totalProduct.active,
           Ẩn: data.totalProduct.inactive,
+          "Hết hàng": data.totalProduct.out_of_stock,
         },
       ]
     : [];
@@ -166,21 +185,21 @@ export default function AdminDashboardPage() {
               <StatCard
                 title="Tổng doanh thu"
                 value={formatCurrency(data.totalRevenue)}
-                sub="Từ tất cả đơn hàng"
+                sub="Từ đơn đã thanh toán hoặc đã giao"
                 icon={<TrendingUp className="h-6 w-6 text-white" />}
                 color="bg-indigo-500"
               />
               <StatCard
                 title="Tổng đơn hàng"
                 value={data.totalBooking.total}
-                sub={`${data.totalBooking.completed} hoàn thành · ${data.totalBooking.pending} chờ`}
+                sub={`${bookingDelivered} đã giao · ${bookingProcessing} đang xử lý`}
                 icon={<ShoppingBag className="h-6 w-6 text-white" />}
                 color="bg-amber-500"
               />
               <StatCard
                 title="Sản phẩm"
                 value={data.totalProduct.total}
-                sub={`${data.totalProduct.active} đang bán · ${data.totalProduct.inactive} ẩn`}
+                sub={`${data.totalProduct.active} đang bán · ${data.totalProduct.inactive} ẩn · ${data.totalProduct.out_of_stock} hết hàng`}
                 icon={<Package className="h-6 w-6 text-white" />}
                 color="bg-violet-500"
               />
@@ -214,8 +233,13 @@ export default function AdminDashboardPage() {
                   <Tooltip />
                   <Legend />
                   <Bar
-                    dataKey="Hoàn thành"
-                    fill={BOOKING_COLORS.completed}
+                    dataKey="Đã giao"
+                    fill={BOOKING_COLORS.delivered}
+                    radius={[4, 4, 0, 0]}
+                  />
+                  <Bar
+                    dataKey="Đang xử lý"
+                    fill={BOOKING_COLORS.processing}
                     radius={[4, 4, 0, 0]}
                   />
                   <Bar
@@ -236,6 +260,11 @@ export default function AdminDashboardPage() {
                   <Bar
                     dataKey="Ẩn"
                     fill={PRODUCT_COLORS.inactive}
+                    radius={[4, 4, 0, 0]}
+                  />
+                  <Bar
+                    dataKey="Hết hàng"
+                    fill={PRODUCT_COLORS.outOfStock}
                     radius={[4, 4, 0, 0]}
                   />
                 </BarChart>
@@ -270,16 +299,22 @@ export default function AdminDashboardPage() {
               <div className="mt-2 space-y-2">
                 {[
                   {
-                    label: "Hoàn thành",
-                    value: data.totalBooking.completed,
-                    color: BOOKING_COLORS.completed,
-                    icon: CheckCircle,
-                  },
-                  {
                     label: "Chờ xử lý",
                     value: data.totalBooking.pending,
                     color: BOOKING_COLORS.pending,
                     icon: Clock,
+                  },
+                  {
+                    label: "Đang xử lý",
+                    value: bookingProcessing,
+                    color: BOOKING_COLORS.processing,
+                    icon: Clock,
+                  },
+                  {
+                    label: "Đã giao",
+                    value: bookingDelivered,
+                    color: BOOKING_COLORS.delivered,
+                    icon: CheckCircle,
                   },
                   {
                     label: "Đã huỷ",
@@ -341,6 +376,11 @@ export default function AdminDashboardPage() {
                     label: "Ẩn",
                     value: data.totalProduct.inactive,
                     color: PRODUCT_COLORS.inactive,
+                  },
+                  {
+                    label: "Hết hàng",
+                    value: data.totalProduct.out_of_stock,
+                    color: PRODUCT_COLORS.outOfStock,
                   },
                 ].map(({ label, value, color }) => (
                   <div
