@@ -1,10 +1,13 @@
 import axios, { AxiosInstance } from "axios";
 import Cookies from "js-cookie";
 
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  "https://ecommerce-management-be.vercel.app";
+
 // Tạo instance Axios với cấu hình mặc định
 const http: AxiosInstance = axios.create({
-  // baseURL: "https://book-tour-khaki.vercel.app",
-  baseURL: "http://localhost:3000",
+  baseURL: API_BASE_URL,
   timeout: 10000,
   withCredentials: true,
   headers: {
