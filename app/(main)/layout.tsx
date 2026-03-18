@@ -1,5 +1,6 @@
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
+import { ChatbotWidget } from "@/components/chatbot-widget";
 
 export default function MainLayout({
   children,
@@ -11,6 +12,7 @@ export default function MainLayout({
       <Header />
       <main className="flex-1">{children}</main>
       <Footer />
+      <ChatbotWidget />
     </div>
   );
 }
