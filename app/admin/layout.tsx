@@ -1,30 +1,39 @@
-"use client";
+'use client';
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/context/AuthContext";
-import { AdminSidebar } from "@/components/admin/sidebar";
+import { useEffect } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
+import { AdminSidebar } from '@/components/admin/sidebar';
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const { user, isLoggedIn } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+  const isAdminLoginPath = pathname === '/admin/login';
 
   // Bảo vệ route admin – chỉ cho phép role "admin"
   useEffect(() => {
-    if (!isLoggedIn) {
-      router.replace("/login?redirect=/admin");
+    if (isAdminLoginPath) {
+      if (isLoggedIn && user?.role === 'admin') {
+        router.replace('/admin');
+      }
       return;
     }
-    if (user?.role !== "admin") {
-      router.replace("/");
-    }
-  }, [isLoggedIn, user, router]);
 
-  if (!isLoggedIn || user?.role !== "admin") {
+    if (!isLoggedIn) {
+      router.replace('/admin/login');
+      return;
+    }
+    if (user?.role !== 'admin') {
+      router.replace('/');
+    }
+  }, [isAdminLoginPath, isLoggedIn, user, router]);
+
+  if (isAdminLoginPath) {
+    return <>{children}</>;
+  }
+
+  if (!isLoggedIn || user?.role !== 'admin') {
     return null; // render nothing while redirecting
   }
 

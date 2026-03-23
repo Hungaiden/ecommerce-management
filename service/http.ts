@@ -4,7 +4,7 @@ import Cookies from "js-cookie";
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ||
   "https://ecommerce-management-be.vercel.app";
-
+const API_BASE_URL_LOCAL = "http://localhost:3000";
 // Tạo instance Axios với cấu hình mặc định
 const http: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
