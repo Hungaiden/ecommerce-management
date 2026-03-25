@@ -1,51 +1,41 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { motion } from "framer-motion";
-import Image from "next/image";
-import Link from "next/link";
-import {
-  Grid,
-  List,
-  ChevronLeft,
-  ChevronRight,
-  Tag,
-  Search,
-} from "lucide-react";
-import { useState, useEffect, useCallback } from "react";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { motion } from 'framer-motion';
+import Image from 'next/image';
+import Link from 'next/link';
+import { Grid, List, ChevronLeft, ChevronRight, Tag, Search } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { getProducts, type Product } from "@/service/products";
-import { getCategories, type Category } from "@/service/admin/categories";
-import { useCart } from "@/context/cart-context";
-import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+} from '@/components/ui/select';
+import { getProducts, type Product } from '@/service/products';
+import { getCategories, type Category } from '@/service/admin/categories';
+import { useCart } from '@/context/cart-context';
+import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
-const FALLBACK_IMAGE =
-  "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&q=80";
+const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&q=80';
 
 const PAGE_SIZE = 8;
 
 export default function ShopPage() {
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-  const [selectedSize, setSelectedSize] = useState<{ [key: string]: string }>(
-    {},
-  );
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [selectedSize, setSelectedSize] = useState<{ [key: string]: string }>({});
   const [products, setProducts] = useState<Product[]>([]);
   const [totalRows, setTotalRows] = useState(0);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [sortBy, setSortBy] = useState("default");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [sortBy, setSortBy] = useState('default');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [categories, setCategories] = useState<Category[]>([]);
-  const [searchInput, setSearchInput] = useState("");
-  const [searchKeyword, setSearchKeyword] = useState("");
+  const [searchInput, setSearchInput] = useState('');
+  const [searchKeyword, setSearchKeyword] = useState('');
   const [addingProductId, setAddingProductId] = useState<string | null>(null);
   const { addItem } = useCart();
 
@@ -53,14 +43,14 @@ export default function ShopPage() {
 
   const getSortParams = (value: string) => {
     switch (value) {
-      case "price-low":
-        return { sortBy: "price", sortType: "asc" as const };
-      case "price-high":
-        return { sortBy: "price", sortType: "desc" as const };
-      case "latest":
-        return { sortBy: "createdAt", sortType: "desc" as const };
-      case "rating":
-        return { sortBy: "rating", sortType: "desc" as const };
+      case 'price-low':
+        return { sortBy: 'price', sortType: 'asc' as const };
+      case 'price-high':
+        return { sortBy: 'price', sortType: 'desc' as const };
+      case 'latest':
+        return { sortBy: 'createdAt', sortType: 'desc' as const };
+      case 'rating':
+        return { sortBy: 'rating', sortType: 'desc' as const };
       default:
         return {};
     }
@@ -69,9 +59,7 @@ export default function ShopPage() {
   // Load categories
   useEffect(() => {
     getCategories({ limit: 100 })
-      .then((res) =>
-        setCategories(res?.hits?.filter((c) => c.status === "active") ?? []),
-      )
+      .then((res) => setCategories(res?.hits?.filter((c) => c.status === 'active') ?? []))
       .catch(() => {});
   }, []);
 
@@ -83,16 +71,16 @@ export default function ShopPage() {
       const result = await getProducts({
         offset: (page - 1) * PAGE_SIZE,
         limit: PAGE_SIZE,
-        status: "active",
-        category: selectedCategory === "all" ? undefined : selectedCategory,
+        status: 'active',
+        category: selectedCategory === 'all' ? undefined : selectedCategory,
         keyword: trimmedKeyword || undefined,
-        field: trimmedKeyword ? "name" : undefined,
+        field: trimmedKeyword ? 'name' : undefined,
         ...sort,
       });
       setProducts((result?.hits as Product[]) ?? []);
       setTotalRows(result?.pagination?.totalRows ?? 0);
     } catch (err) {
-      console.error("Lỗi khi tải sản phẩm:", err);
+      console.error('Lỗi khi tải sản phẩm:', err);
     } finally {
       setLoading(false);
     }
@@ -119,8 +107,8 @@ export default function ShopPage() {
   };
 
   const clearSearch = () => {
-    setSearchInput("");
-    setSearchKeyword("");
+    setSearchInput('');
+    setSearchKeyword('');
     setPage(1);
   };
 
@@ -129,10 +117,10 @@ export default function ShopPage() {
   };
 
   const handleAddToCart = async (product: Product) => {
-    if (!product?._id || product.status === "out_of_stock") return;
+    if (!product?._id || product.status === 'out_of_stock') return;
 
-    const size = selectedSize[product._id] || product.sizes?.[0] || "";
-    const color = product.colors?.[0] || "";
+    const size = selectedSize[product._id] || product.sizes?.[0] || '';
+    const color = product.colors?.[0] || '';
 
     setAddingProductId(product._id);
     try {
@@ -142,13 +130,11 @@ export default function ShopPage() {
         size: size || undefined,
         color: color || undefined,
       });
-      toast.success("Đã thêm vào giỏ hàng!");
+      toast.success('Đã thêm vào giỏ hàng!');
     } catch (err: any) {
-      toast.error(err?.message || "Có lỗi xảy ra, vui lòng thử lại.");
+      toast.error(err?.message || 'Có lỗi xảy ra, vui lòng thử lại.');
     } finally {
-      setAddingProductId((current) =>
-        current === product._id ? null : current,
-      );
+      setAddingProductId((current) => (current === product._id ? null : current));
     }
   };
 
@@ -186,10 +172,7 @@ export default function ShopPage() {
             {searchKeyword && (
               <p className="text-sm text-gray-500">
                 Kết quả cho từ khóa: "
-                <span className="font-medium text-gray-700">
-                  {searchKeyword}
-                </span>
-                "
+                <span className="font-medium text-gray-700">{searchKeyword}</span>"
               </p>
             )}
 
@@ -205,26 +188,24 @@ export default function ShopPage() {
                     <SelectItem value="rating">Theo đánh giá</SelectItem>
                     <SelectItem value="latest">Mới nhất</SelectItem>
                     <SelectItem value="price-low">Giá: thấp đến cao</SelectItem>
-                    <SelectItem value="price-high">
-                      Giá: cao đến thấp
-                    </SelectItem>
+                    <SelectItem value="price-high">Giá: cao đến thấp</SelectItem>
                   </SelectContent>
                 </Select>
 
                 {/* View Mode */}
                 <div className="flex gap-1 ml-2">
                   <Button
-                    variant={viewMode === "grid" ? "default" : "outline"}
+                    variant={viewMode === 'grid' ? 'default' : 'outline'}
                     size="icon"
-                    onClick={() => setViewMode("grid")}
+                    onClick={() => setViewMode('grid')}
                     className="h-9 w-9"
                   >
                     <Grid className="h-4 w-4" />
                   </Button>
                   <Button
-                    variant={viewMode === "list" ? "default" : "outline"}
+                    variant={viewMode === 'list' ? 'default' : 'outline'}
                     size="icon"
-                    onClick={() => setViewMode("list")}
+                    onClick={() => setViewMode('list')}
                     className="h-9 w-9"
                   >
                     <List className="h-4 w-4" />
@@ -236,7 +217,7 @@ export default function ShopPage() {
               <span className="text-sm text-gray-500">
                 {totalRows > 0
                   ? `${(page - 1) * PAGE_SIZE + 1}–${Math.min(page * PAGE_SIZE, totalRows)} / ${totalRows} sản phẩm`
-                  : "0 sản phẩm"}
+                  : '0 sản phẩm'}
               </span>
             </div>
           </div>
@@ -258,12 +239,12 @@ export default function ShopPage() {
               <ul className="space-y-1">
                 <li>
                   <button
-                    onClick={() => handleCategoryChange("all")}
+                    onClick={() => handleCategoryChange('all')}
                     className={cn(
-                      "w-full text-left px-3 py-2 rounded text-sm transition-colors",
-                      selectedCategory === "all"
-                        ? "bg-gray-900 text-white font-medium"
-                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                      'w-full text-left px-3 py-2 rounded text-sm transition-colors',
+                      selectedCategory === 'all'
+                        ? 'bg-gray-900 text-white font-medium'
+                        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
                     )}
                   >
                     Tất cả sản phẩm
@@ -274,10 +255,10 @@ export default function ShopPage() {
                     <button
                       onClick={() => handleCategoryChange(cat._id)}
                       className={cn(
-                        "w-full text-left px-3 py-2 rounded text-sm transition-colors",
+                        'w-full text-left px-3 py-2 rounded text-sm transition-colors',
                         selectedCategory === cat._id
-                          ? "bg-gray-900 text-white font-medium"
-                          : "text-gray-600 hover:bg-gray-100 hover:text-gray-900",
+                          ? 'bg-gray-900 text-white font-medium'
+                          : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
                       )}
                     >
                       {cat.title}
@@ -296,12 +277,12 @@ export default function ShopPage() {
             {categories.length > 0 && (
               <div className="flex md:hidden gap-2 flex-wrap mb-4">
                 <button
-                  onClick={() => handleCategoryChange("all")}
+                  onClick={() => handleCategoryChange('all')}
                   className={cn(
-                    "px-3 py-1.5 rounded-full border text-sm transition-colors",
-                    selectedCategory === "all"
-                      ? "bg-gray-900 text-white border-gray-900"
-                      : "border-gray-300 text-gray-600 hover:border-gray-600",
+                    'px-3 py-1.5 rounded-full border text-sm transition-colors',
+                    selectedCategory === 'all'
+                      ? 'bg-gray-900 text-white border-gray-900'
+                      : 'border-gray-300 text-gray-600 hover:border-gray-600',
                   )}
                 >
                   Tất cả
@@ -311,10 +292,10 @@ export default function ShopPage() {
                     key={cat._id}
                     onClick={() => handleCategoryChange(cat._id)}
                     className={cn(
-                      "px-3 py-1.5 rounded-full border text-sm transition-colors",
+                      'px-3 py-1.5 rounded-full border text-sm transition-colors',
                       selectedCategory === cat._id
-                        ? "bg-gray-900 text-white border-gray-900"
-                        : "border-gray-300 text-gray-600 hover:border-gray-600",
+                        ? 'bg-gray-900 text-white border-gray-900'
+                        : 'border-gray-300 text-gray-600 hover:border-gray-600',
                     )}
                   >
                     {cat.title}
@@ -326,9 +307,9 @@ export default function ShopPage() {
             {loading ? (
               <div
                 className={
-                  viewMode === "grid"
-                    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-                    : "flex flex-col gap-6"
+                  viewMode === 'grid'
+                    ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
+                    : 'flex flex-col gap-6'
                 }
               >
                 {Array.from({ length: PAGE_SIZE }).map((_, i) => (
@@ -347,14 +328,13 @@ export default function ShopPage() {
             ) : (
               <div
                 className={
-                  viewMode === "grid"
-                    ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-                    : "flex flex-col gap-6"
+                  viewMode === 'grid'
+                    ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
+                    : 'flex flex-col gap-6'
                 }
               >
                 {products.map((product, index) => {
-                  const thumbnail =
-                    product.thumbnail || product.images?.[0] || FALLBACK_IMAGE;
+                  const thumbnail = product.thumbnail || product.images?.[0] || FALLBACK_IMAGE;
                   const discountedPrice =
                     product.discount && product.discount > 0
                       ? product.price * (1 - product.discount / 100)
@@ -367,7 +347,7 @@ export default function ShopPage() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.4, delay: index * 0.04 }}
                     >
-                      {viewMode === "grid" ? (
+                      {viewMode === 'grid' ? (
                         <div className="group cursor-pointer">
                           <Link href={`/shop/${product._id}`}>
                             <div className="relative h-[340px] overflow-hidden bg-gray-100 mb-4">
@@ -378,11 +358,11 @@ export default function ShopPage() {
                                 className="object-cover group-hover:scale-105 transition-transform duration-500"
                               />
                               {product.discount && product.discount > 0 && (
-                                <span className="absolute top-2 left-2 bg-red-500 text-white text-xs font-semibold px-2 py-1">
+                                <span className="absolute top-3 left-3 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs font-bold px-2.5 py-1 rounded animate-pulse-highlight shadow-lg">
                                   -{product.discount}%
                                 </span>
                               )}
-                              {product.status === "out_of_stock" && (
+                              {product.status === 'out_of_stock' && (
                                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                                   <span className="text-white font-semibold text-sm tracking-widest">
                                     HẾT HÀNG
@@ -397,13 +377,11 @@ export default function ShopPage() {
                               {product.sizes.map((size) => (
                                 <button
                                   key={size}
-                                  onClick={() =>
-                                    handleSizeSelect(product._id, size)
-                                  }
+                                  onClick={() => handleSizeSelect(product._id, size)}
                                   className={`w-8 h-8 border text-sm font-medium transition-colors ${
                                     selectedSize[product._id] === size
-                                      ? "border-gray-900 bg-gray-900 text-white"
-                                      : "border-gray-300 hover:border-gray-900"
+                                      ? 'border-gray-900 bg-gray-900 text-white'
+                                      : 'border-gray-300 hover:border-gray-900'
                                   }`}
                                 >
                                   {size}
@@ -417,23 +395,21 @@ export default function ShopPage() {
                               {product.name}
                             </h3>
                             {product.brand && (
-                              <p className="text-sm text-gray-500 mb-1">
-                                {product.brand}
-                              </p>
+                              <p className="text-sm text-gray-500 mb-1">{product.brand}</p>
                             )}
                             <div className="flex items-center justify-center gap-2 mb-3">
                               {discountedPrice ? (
                                 <>
                                   <span className="font-semibold text-lg text-red-600">
-                                    {discountedPrice.toLocaleString("vi-VN")}₫
+                                    {discountedPrice.toLocaleString('vi-VN')}₫
                                   </span>
                                   <span className="text-sm text-gray-400 line-through">
-                                    {product.price.toLocaleString("vi-VN")}₫
+                                    {product.price.toLocaleString('vi-VN')}₫
                                   </span>
                                 </>
                               ) : (
                                 <span className="font-semibold text-lg">
-                                  {product.price.toLocaleString("vi-VN")}₫
+                                  {product.price.toLocaleString('vi-VN')}₫
                                 </span>
                               )}
                             </div>
@@ -441,23 +417,17 @@ export default function ShopPage() {
                               className="w-full bg-gray-900 hover:bg-gray-800 text-white font-medium"
                               size="lg"
                               disabled={
-                                product.status === "out_of_stock" ||
-                                addingProductId === product._id
+                                product.status === 'out_of_stock' || addingProductId === product._id
                               }
                               onClick={() => handleAddToCart(product)}
                             >
-                              {addingProductId === product._id
-                                ? "ĐANG THÊM..."
-                                : "THÊM VÀO GIỎ"}
+                              {addingProductId === product._id ? 'ĐANG THÊM...' : 'THÊM VÀO GIỎ'}
                             </Button>
                           </div>
                         </div>
                       ) : (
                         <div className="flex gap-6 group border-b pb-6">
-                          <Link
-                            href={`/shop/${product._id}`}
-                            className="shrink-0"
-                          >
+                          <Link href={`/shop/${product._id}`} className="shrink-0">
                             <div className="relative w-[160px] h-[200px] overflow-hidden bg-gray-100">
                               <Image
                                 src={thumbnail}
@@ -474,9 +444,7 @@ export default function ShopPage() {
                               </h3>
                             </Link>
                             {product.brand && (
-                              <p className="text-sm text-gray-500">
-                                {product.brand}
-                              </p>
+                              <p className="text-sm text-gray-500">{product.brand}</p>
                             )}
                             {product.description && (
                               <p className="text-sm text-gray-600 line-clamp-2">
@@ -487,29 +455,26 @@ export default function ShopPage() {
                               {discountedPrice ? (
                                 <>
                                   <span className="font-semibold text-lg text-red-600">
-                                    {discountedPrice.toLocaleString("vi-VN")}₫
+                                    {discountedPrice.toLocaleString('vi-VN')}₫
                                   </span>
                                   <span className="text-sm text-gray-400 line-through">
-                                    {product.price.toLocaleString("vi-VN")}₫
+                                    {product.price.toLocaleString('vi-VN')}₫
                                   </span>
                                 </>
                               ) : (
                                 <span className="font-semibold text-lg">
-                                  {product.price.toLocaleString("vi-VN")}₫
+                                  {product.price.toLocaleString('vi-VN')}₫
                                 </span>
                               )}
                             </div>
                             <Button
                               className="w-fit bg-gray-900 hover:bg-gray-800 text-white"
                               disabled={
-                                product.status === "out_of_stock" ||
-                                addingProductId === product._id
+                                product.status === 'out_of_stock' || addingProductId === product._id
                               }
                               onClick={() => handleAddToCart(product)}
                             >
-                              {addingProductId === product._id
-                                ? "ĐANG THÊM..."
-                                : "THÊM VÀO GIỎ"}
+                              {addingProductId === product._id ? 'ĐANG THÊM...' : 'THÊM VÀO GIỎ'}
                             </Button>
                           </div>
                         </div>
@@ -536,20 +501,16 @@ export default function ShopPage() {
                 {Array.from({ length: totalPages }).map((_, i) => {
                   const p = i + 1;
                   // Show first, last, current ±1
-                  if (
-                    p === 1 ||
-                    p === totalPages ||
-                    (p >= page - 1 && p <= page + 1)
-                  ) {
+                  if (p === 1 || p === totalPages || (p >= page - 1 && p <= page + 1)) {
                     return (
                       <Button
                         key={p}
-                        variant={p === page ? "default" : "outline"}
+                        variant={p === page ? 'default' : 'outline'}
                         size="icon"
                         onClick={() => setPage(p)}
                         className={cn(
-                          "h-9 w-9 text-sm",
-                          p === page && "bg-gray-900 hover:bg-gray-800",
+                          'h-9 w-9 text-sm',
+                          p === page && 'bg-gray-900 hover:bg-gray-800',
                         )}
                       >
                         {p}

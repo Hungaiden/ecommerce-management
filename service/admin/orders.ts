@@ -1,4 +1,4 @@
-import http from "../http";
+import http from '../http';
 
 export interface OrderItem {
   product_id: string;
@@ -19,16 +19,11 @@ export interface ContactInfo {
   address: string;
 }
 
-export type OrderStatus =
-  | "pending"
-  | "confirmed"
-  | "shipping"
-  | "delivered"
-  | "cancelled";
+export type OrderStatus = 'pending' | 'confirmed' | 'shipping' | 'delivered' | 'cancelled';
 
-export type PaymentStatus = "pending" | "paid" | "failed" | "refunded";
+export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded';
 
-export type PaymentMethod = "vnpay" | "momo" | "cash" | "bank_transfer";
+export type PaymentMethod = 'vnpay' | 'momo' | 'cash' | 'bank_transfer';
 
 export interface Order {
   _id: string;
@@ -43,8 +38,10 @@ export interface Order {
   transaction_code?: string;
   payment_time?: string;
   deleted: boolean;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface GetOrdersParams {
@@ -54,7 +51,7 @@ export interface GetOrdersParams {
   status?: string;
   payment_status?: string;
   sortBy?: string;
-  sortType?: "asc" | "desc";
+  sortType?: 'asc' | 'desc';
 }
 
 export interface OrdersResponse {
@@ -62,10 +59,8 @@ export interface OrdersResponse {
   pagination: { totalRows: number; totalPages: number };
 }
 
-export const adminGetAllOrders = async (
-  params?: GetOrdersParams,
-): Promise<OrdersResponse> => {
-  const response = await http.get("/products/bookings/getAll", { params });
+export const adminGetAllOrders = async (params?: GetOrdersParams): Promise<OrdersResponse> => {
+  const response = await http.get('/products/bookings/getAll', { params });
   return response.data.data;
 };
 

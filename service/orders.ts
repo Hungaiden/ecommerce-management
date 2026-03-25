@@ -1,4 +1,4 @@
-import http from "./http";
+import http from './http';
 
 export interface OrderItem {
   product_id: string;
@@ -24,19 +24,17 @@ export interface CreateOrderPayload {
   contact_info: ContactInfo;
   note?: string;
   total_price: number;
-  payment_method: "cash" | "bank_transfer" | "vnpay";
+  discount_id?: string;
+  discount_code?: string;
+  discount_amount?: number;
+  payment_method: 'cash' | 'bank_transfer' | 'vnpay';
 }
 
-export type OrderStatus =
-  | "pending"
-  | "confirmed"
-  | "shipping"
-  | "delivered"
-  | "cancelled";
+export type OrderStatus = 'pending' | 'confirmed' | 'shipping' | 'delivered' | 'cancelled';
 
-export type PaymentStatus = "pending" | "paid" | "failed" | "refunded";
+export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refunded';
 
-export type PaymentMethod = "vnpay" | "momo" | "cash" | "bank_transfer";
+export type PaymentMethod = 'vnpay' | 'momo' | 'cash' | 'bank_transfer';
 
 export interface Order {
   _id: string;
@@ -46,6 +44,9 @@ export interface Order {
   contact_info: ContactInfo;
   note?: string;
   total_price: number;
+  discount_id?: string;
+  discount_code?: string;
+  discount_amount?: number;
   payment_method: PaymentMethod;
   payment_status: PaymentStatus;
   status: OrderStatus;
@@ -57,7 +58,7 @@ export interface GetMyOrdersParams {
   offset?: number;
   limit?: number;
   sortBy?: string;
-  sortType?: "asc" | "desc";
+  sortType?: 'asc' | 'desc';
 }
 
 export interface MyOrdersResponse {
@@ -68,13 +69,8 @@ export interface MyOrdersResponse {
   };
 }
 
-export const createOrder = async (
-  payload: CreateOrderPayload,
-): Promise<Order> => {
-  const response = await http.post<{ data: Order }>(
-    "/products/bookings/create",
-    payload,
-  );
+export const createOrder = async (payload: CreateOrderPayload): Promise<Order> => {
+  const response = await http.post<{ data: Order }>('/products/bookings/create', payload);
   return response.data.data;
 };
 

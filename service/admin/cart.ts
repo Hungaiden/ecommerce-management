@@ -1,4 +1,4 @@
-import http from "../http";
+import http from '../http';
 
 export interface CartProduct {
   _id: string;
@@ -27,7 +27,7 @@ export interface CartUser {
 
 export interface AdminCart {
   _id: string;
-  user_id: CartUser | null;
+  user_id: CartUser | string | null;
   items: CartItem[];
   createdAt?: string;
   updatedAt?: string;
@@ -47,14 +47,12 @@ export const adminGetAllCarts = async (params?: {
   limit?: number;
   keyword?: string;
 }): Promise<AdminCartsResponse> => {
-  const response = await http.get("/admin-carts", { params });
+  const response = await http.get('/admin-carts', { params });
   return response.data.data;
 };
 
 // Lấy giỏ hàng của 1 user
-export const adminGetCartByUser = async (
-  userId: string,
-): Promise<AdminCart> => {
+export const adminGetCartByUser = async (userId: string): Promise<AdminCart> => {
   const response = await http.get(`/admin-carts/${userId}`);
   return response.data.data;
 };
@@ -65,10 +63,7 @@ export const adminClearUserCart = async (userId: string): Promise<void> => {
 };
 
 // Xoá 1 item khỏi giỏ hàng của user
-export const adminRemoveCartItem = async (
-  userId: string,
-  itemId: string,
-): Promise<AdminCart> => {
+export const adminRemoveCartItem = async (userId: string, itemId: string): Promise<AdminCart> => {
   const response = await http.delete(`/admin-carts/${userId}/item/${itemId}`);
   return response.data.data;
 };

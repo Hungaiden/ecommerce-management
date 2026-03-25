@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback } from "react";
-import { AdminHeader } from "@/components/admin/header";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useState, useEffect, useCallback } from 'react';
+import { AdminHeader } from '@/components/admin/header';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -13,20 +13,15 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+} from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,7 +31,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
 import {
   Pagination,
   PaginationContent,
@@ -45,10 +40,10 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/ui/pagination";
-import { toast } from "sonner";
-import { Search, Eye, Trash2 } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
+} from '@/components/ui/pagination';
+import { toast } from 'sonner';
+import { Search, Eye, Trash2 } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 import {
   adminGetAllOrders,
   adminGetOrderById,
@@ -57,7 +52,7 @@ import {
   type Order,
   type OrderStatus,
   type PaymentStatus,
-} from "@/service/admin/orders";
+} from '@/service/admin/orders';
 
 const PAGE_SIZE = 10;
 
@@ -65,34 +60,42 @@ const ORDER_STATUS_MAP: Record<
   OrderStatus,
   {
     label: string;
-    variant: "default" | "secondary" | "destructive" | "outline";
+    variant: 'default' | 'secondary' | 'destructive' | 'outline';
   }
 > = {
-  pending: { label: "Chờ xử lý", variant: "secondary" },
-  confirmed: { label: "Đã xác nhận", variant: "default" },
-  shipping: { label: "Đang giao", variant: "outline" },
-  delivered: { label: "Đã giao", variant: "default" },
-  cancelled: { label: "Đã huỷ", variant: "destructive" },
+  pending: { label: 'Chờ xử lý', variant: 'secondary' },
+  confirmed: { label: 'Đã xác nhận', variant: 'default' },
+  shipping: { label: 'Đang giao', variant: 'outline' },
+  delivered: { label: 'Đã giao', variant: 'default' },
+  cancelled: { label: 'Đã huỷ', variant: 'destructive' },
 };
 
 const PAYMENT_STATUS_MAP: Record<
   PaymentStatus,
   {
     label: string;
-    variant: "default" | "secondary" | "destructive" | "outline";
+    variant: 'default' | 'secondary' | 'destructive' | 'outline';
   }
 > = {
-  pending: { label: "Chưa thanh toán", variant: "secondary" },
-  paid: { label: "Đã thanh toán", variant: "default" },
-  failed: { label: "Thất bại", variant: "destructive" },
-  refunded: { label: "Hoàn tiền", variant: "outline" },
+  pending: { label: 'Chưa thanh toán', variant: 'secondary' },
+  paid: { label: 'Đã thanh toán', variant: 'default' },
+  failed: { label: 'Thất bại', variant: 'destructive' },
+  refunded: { label: 'Hoàn tiền', variant: 'outline' },
 };
 
 const PAYMENT_METHOD_LABEL: Record<string, string> = {
-  vnpay: "VNPay",
-  momo: "MoMo",
-  cash: "Tiền mặt",
-  bank_transfer: "Chuyển khoản",
+  vnpay: 'VNPay',
+  momo: 'MoMo',
+  cash: 'Tiền mặt',
+  bank_transfer: 'Chuyển khoản',
+};
+
+const formatOrderDate = (order: Order, withTime = false) => {
+  const rawDate = order.createdAt || order.created_at;
+  if (!rawDate) return '—';
+  const date = new Date(rawDate);
+  if (Number.isNaN(date.getTime())) return '—';
+  return withTime ? date.toLocaleString('vi-VN') : date.toLocaleDateString('vi-VN');
 };
 
 export default function AdminOrdersPage() {
@@ -100,9 +103,9 @@ export default function AdminOrdersPage() {
   const [totalRows, setTotalRows] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
-  const [keyword, setKeyword] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [paymentFilter, setPaymentFilter] = useState("all");
+  const [keyword, setKeyword] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [paymentFilter, setPaymentFilter] = useState('all');
 
   const [detailOrder, setDetailOrder] = useState<Order | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -120,15 +123,15 @@ export default function AdminOrdersPage() {
         offset: (page - 1) * PAGE_SIZE,
         limit: PAGE_SIZE,
         keyword: keyword || undefined,
-        status: statusFilter !== "all" ? statusFilter : undefined,
-        payment_status: paymentFilter !== "all" ? paymentFilter : undefined,
-        sortBy: "createdAt",
-        sortType: "desc",
+        status: statusFilter !== 'all' ? statusFilter : undefined,
+        payment_status: paymentFilter !== 'all' ? paymentFilter : undefined,
+        sortBy: 'created_at',
+        sortType: 'desc',
       });
       setOrders(result.hits ?? []);
       setTotalRows(result.pagination?.totalRows ?? 0);
     } catch {
-      toast.error("Không thể tải danh sách đơn hàng");
+      toast.error('Không thể tải danh sách đơn hàng');
     } finally {
       setLoading(false);
     }
@@ -151,7 +154,7 @@ export default function AdminOrdersPage() {
       const order = await adminGetOrderById(id);
       setDetailOrder(order);
     } catch {
-      toast.error("Không thể tải chi tiết đơn hàng");
+      toast.error('Không thể tải chi tiết đơn hàng');
       setDetailOpen(false);
     } finally {
       setDetailLoading(false);
@@ -160,23 +163,19 @@ export default function AdminOrdersPage() {
 
   const handleUpdateStatus = async (
     id: string,
-    field: "status" | "payment_status",
+    field: 'status' | 'payment_status',
     value: string,
   ) => {
     setUpdating(id);
     try {
       await adminUpdateOrder(id, { [field]: value as any });
-      toast.success("Cập nhật thành công");
-      setOrders((prev) =>
-        prev.map((o) => (o._id === id ? { ...o, [field]: value } : o)),
-      );
+      toast.success('Cập nhật thành công');
+      setOrders((prev) => prev.map((o) => (o._id === id ? { ...o, [field]: value } : o)));
       if (detailOrder?._id === id) {
-        setDetailOrder((prev) =>
-          prev ? { ...prev, [field]: value as any } : prev,
-        );
+        setDetailOrder((prev) => (prev ? { ...prev, [field]: value as any } : prev));
       }
     } catch {
-      toast.error("Cập nhật thất bại");
+      toast.error('Cập nhật thất bại');
     } finally {
       setUpdating(null);
     }
@@ -186,11 +185,11 @@ export default function AdminOrdersPage() {
     if (!deleteId) return;
     try {
       await adminDeleteOrder(deleteId);
-      toast.success("Đã xoá đơn hàng");
+      toast.success('Đã xoá đơn hàng');
       setOrders((prev) => prev.filter((o) => o._id !== deleteId));
       setTotalRows((prev) => Math.max(0, prev - 1));
     } catch {
-      toast.error("Xoá thất bại");
+      toast.error('Xoá thất bại');
     } finally {
       setDeleteId(null);
     }
@@ -198,18 +197,12 @@ export default function AdminOrdersPage() {
 
   return (
     <div className="flex flex-col">
-      <AdminHeader
-        title="Quản lý đơn hàng"
-        description={`${totalRows} đơn hàng`}
-      />
+      <AdminHeader title="Quản lý đơn hàng" description={`${totalRows} đơn hàng`} />
 
       <div className="flex-1 space-y-4 p-6">
         {/* Toolbar */}
         <div className="flex flex-wrap items-center gap-3">
-          <form
-            onSubmit={handleSearch}
-            className="relative flex-1 min-w-[220px] max-w-sm"
-          >
+          <form onSubmit={handleSearch} className="relative flex-1 min-w-[220px] max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Tìm theo tên, email, SĐT..."
@@ -287,10 +280,7 @@ export default function AdminOrdersPage() {
                 ))
               ) : orders.length === 0 ? (
                 <TableRow>
-                  <TableCell
-                    colSpan={8}
-                    className="text-center py-12 text-gray-400"
-                  >
+                  <TableCell colSpan={8} className="text-center py-12 text-gray-400">
                     Không có đơn hàng nào
                   </TableCell>
                 </TableRow>
@@ -298,18 +288,16 @@ export default function AdminOrdersPage() {
                 orders.map((order, idx) => {
                   const statusInfo = ORDER_STATUS_MAP[order.status] ?? {
                     label: order.status,
-                    variant: "secondary",
+                    variant: 'secondary',
                   };
                   const payInfo = PAYMENT_STATUS_MAP[order.payment_status] ?? {
                     label: order.payment_status,
-                    variant: "secondary",
+                    variant: 'secondary',
                   };
                   const customer =
                     order.contact_info?.name ||
-                    (typeof order.user_id === "object"
-                      ? order.user_id?.fullName
-                      : "") ||
-                    "—";
+                    (typeof order.user_id === 'object' ? order.user_id?.fullName : '') ||
+                    '—';
                   return (
                     <TableRow key={order._id} className="hover:bg-gray-50">
                       <TableCell className="text-gray-400 text-xs">
@@ -330,30 +318,19 @@ export default function AdminOrdersPage() {
                         <Select
                           value={order.status}
                           disabled={updating === order._id}
-                          onValueChange={(v) =>
-                            handleUpdateStatus(order._id, "status", v)
-                          }
+                          onValueChange={(v) => handleUpdateStatus(order._id, 'status', v)}
                         >
                           <SelectTrigger className="h-7 w-36 text-xs">
-                            <Badge
-                              variant={statusInfo.variant}
-                              className="text-xs"
-                            >
+                            <Badge variant={statusInfo.variant} className="text-xs">
                               {statusInfo.label}
                             </Badge>
                           </SelectTrigger>
                           <SelectContent>
-                            {Object.entries(ORDER_STATUS_MAP).map(
-                              ([val, { label }]) => (
-                                <SelectItem
-                                  key={val}
-                                  value={val}
-                                  className="text-xs"
-                                >
-                                  {label}
-                                </SelectItem>
-                              ),
-                            )}
+                            {Object.entries(ORDER_STATUS_MAP).map(([val, { label }]) => (
+                              <SelectItem key={val} value={val} className="text-xs">
+                                {label}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </TableCell>
@@ -361,41 +338,29 @@ export default function AdminOrdersPage() {
                         <Select
                           value={order.payment_status}
                           disabled={updating === order._id}
-                          onValueChange={(v) =>
-                            handleUpdateStatus(order._id, "payment_status", v)
-                          }
+                          onValueChange={(v) => handleUpdateStatus(order._id, 'payment_status', v)}
                         >
                           <SelectTrigger className="h-7 w-40 text-xs">
-                            <Badge
-                              variant={payInfo.variant}
-                              className="text-xs"
-                            >
+                            <Badge variant={payInfo.variant} className="text-xs">
                               {payInfo.label}
                             </Badge>
                           </SelectTrigger>
                           <SelectContent>
-                            {Object.entries(PAYMENT_STATUS_MAP).map(
-                              ([val, { label }]) => (
-                                <SelectItem
-                                  key={val}
-                                  value={val}
-                                  className="text-xs"
-                                >
-                                  {label}
-                                </SelectItem>
-                              ),
-                            )}
+                            {Object.entries(PAYMENT_STATUS_MAP).map(([val, { label }]) => (
+                              <SelectItem key={val} value={val} className="text-xs">
+                                {label}
+                              </SelectItem>
+                            ))}
                           </SelectContent>
                         </Select>
                       </TableCell>
                       <TableCell className="text-sm text-gray-600">
                         {order.payment_method
-                          ? (PAYMENT_METHOD_LABEL[order.payment_method] ??
-                            order.payment_method)
-                          : "—"}
+                          ? (PAYMENT_METHOD_LABEL[order.payment_method] ?? order.payment_method)
+                          : '—'}
                       </TableCell>
                       <TableCell className="text-xs text-gray-400">
-                        {new Date(order.createdAt).toLocaleDateString("vi-VN")}
+                        {formatOrderDate(order)}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
@@ -433,11 +398,7 @@ export default function AdminOrdersPage() {
                 <PaginationPrevious
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   aria-disabled={page === 1}
-                  className={
-                    page === 1
-                      ? "pointer-events-none opacity-50"
-                      : "cursor-pointer"
-                  }
+                  className={page === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
                 />
               </PaginationItem>
               {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
@@ -464,9 +425,7 @@ export default function AdminOrdersPage() {
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   aria-disabled={page === totalPages}
                   className={
-                    page === totalPages
-                      ? "pointer-events-none opacity-50"
-                      : "cursor-pointer"
+                    page === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'
                   }
                 />
               </PaginationItem>
@@ -491,22 +450,12 @@ export default function AdminOrdersPage() {
             <div className="space-y-5 text-sm">
               {/* ID + trạng thái */}
               <div className="flex flex-wrap gap-2 items-center">
-                <span className="text-gray-400 text-xs font-mono">
-                  {detailOrder._id}
-                </span>
-                <Badge
-                  variant={
-                    ORDER_STATUS_MAP[detailOrder.status]?.variant ?? "secondary"
-                  }
-                >
-                  {ORDER_STATUS_MAP[detailOrder.status]?.label ??
-                    detailOrder.status}
+                <span className="text-gray-400 text-xs font-mono">{detailOrder._id}</span>
+                <Badge variant={ORDER_STATUS_MAP[detailOrder.status]?.variant ?? 'secondary'}>
+                  {ORDER_STATUS_MAP[detailOrder.status]?.label ?? detailOrder.status}
                 </Badge>
                 <Badge
-                  variant={
-                    PAYMENT_STATUS_MAP[detailOrder.payment_status]?.variant ??
-                    "secondary"
-                  }
+                  variant={PAYMENT_STATUS_MAP[detailOrder.payment_status]?.variant ?? 'secondary'}
                 >
                   {PAYMENT_STATUS_MAP[detailOrder.payment_status]?.label ??
                     detailOrder.payment_status}
@@ -515,9 +464,7 @@ export default function AdminOrdersPage() {
 
               {/* Thông tin khách */}
               <div className="rounded-lg border p-4 space-y-1">
-                <p className="font-semibold text-gray-700 mb-2">
-                  Thông tin khách hàng
-                </p>
+                <p className="font-semibold text-gray-700 mb-2">Thông tin khách hàng</p>
                 <div className="grid grid-cols-2 gap-1 text-gray-600">
                   <span className="text-gray-400">Họ tên:</span>
                   <span>{detailOrder.contact_info?.name}</span>
@@ -545,13 +492,9 @@ export default function AdminOrdersPage() {
                   <thead>
                     <tr className="border-b text-gray-400 text-xs">
                       <th className="px-4 py-2 text-left font-normal">Tên</th>
-                      <th className="px-4 py-2 text-center font-normal">
-                        Phân loại
-                      </th>
+                      <th className="px-4 py-2 text-center font-normal">Phân loại</th>
                       <th className="px-4 py-2 text-center font-normal">SL</th>
-                      <th className="px-4 py-2 text-right font-normal">
-                        Thành tiền
-                      </th>
+                      <th className="px-4 py-2 text-right font-normal">Thành tiền</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -559,13 +502,9 @@ export default function AdminOrdersPage() {
                       <tr key={i} className="border-b last:border-0">
                         <td className="px-4 py-2 text-gray-800">{item.name}</td>
                         <td className="px-4 py-2 text-center text-gray-500 text-xs">
-                          {[item.size, item.color]
-                            .filter(Boolean)
-                            .join(" / ") || "—"}
+                          {[item.size, item.color].filter(Boolean).join(' / ') || '—'}
                         </td>
-                        <td className="px-4 py-2 text-center">
-                          {item.quantity}
-                        </td>
+                        <td className="px-4 py-2 text-center">{item.quantity}</td>
                         <td className="px-4 py-2 text-right text-indigo-700 font-medium">
                           {formatCurrency(item.subtotal)}
                         </td>
@@ -578,32 +517,23 @@ export default function AdminOrdersPage() {
               {/* Tổng */}
               <div className="flex justify-between items-center font-semibold text-base border-t pt-3">
                 <span>Tổng cộng</span>
-                <span className="text-indigo-700">
-                  {formatCurrency(detailOrder.total_price)}
-                </span>
+                <span className="text-indigo-700">{formatCurrency(detailOrder.total_price)}</span>
               </div>
 
               {/* Thanh toán */}
               <div className="text-gray-500 text-xs space-y-0.5">
                 {detailOrder.payment_method && (
                   <p>
-                    Phương thức:{" "}
-                    {PAYMENT_METHOD_LABEL[detailOrder.payment_method] ??
-                      detailOrder.payment_method}
+                    Phương thức:{' '}
+                    {PAYMENT_METHOD_LABEL[detailOrder.payment_method] ?? detailOrder.payment_method}
                   </p>
                 )}
                 {detailOrder.transaction_code && (
                   <p>
-                    Mã GD:{" "}
-                    <span className="font-mono">
-                      {detailOrder.transaction_code}
-                    </span>
+                    Mã GD: <span className="font-mono">{detailOrder.transaction_code}</span>
                   </p>
                 )}
-                <p>
-                  Ngày đặt:{" "}
-                  {new Date(detailOrder.createdAt).toLocaleString("vi-VN")}
-                </p>
+                <p>Ngày đặt: {formatOrderDate(detailOrder, true)}</p>
               </div>
 
               {/* Actions */}
@@ -613,21 +543,17 @@ export default function AdminOrdersPage() {
                   <Select
                     value={detailOrder.status}
                     disabled={updating === detailOrder._id}
-                    onValueChange={(v) =>
-                      handleUpdateStatus(detailOrder._id, "status", v)
-                    }
+                    onValueChange={(v) => handleUpdateStatus(detailOrder._id, 'status', v)}
                   >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {Object.entries(ORDER_STATUS_MAP).map(
-                        ([val, { label }]) => (
-                          <SelectItem key={val} value={val}>
-                            {label}
-                          </SelectItem>
-                        ),
-                      )}
+                      {Object.entries(ORDER_STATUS_MAP).map(([val, { label }]) => (
+                        <SelectItem key={val} value={val}>
+                          {label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -636,21 +562,17 @@ export default function AdminOrdersPage() {
                   <Select
                     value={detailOrder.payment_status}
                     disabled={updating === detailOrder._id}
-                    onValueChange={(v) =>
-                      handleUpdateStatus(detailOrder._id, "payment_status", v)
-                    }
+                    onValueChange={(v) => handleUpdateStatus(detailOrder._id, 'payment_status', v)}
                   >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {Object.entries(PAYMENT_STATUS_MAP).map(
-                        ([val, { label }]) => (
-                          <SelectItem key={val} value={val}>
-                            {label}
-                          </SelectItem>
-                        ),
-                      )}
+                      {Object.entries(PAYMENT_STATUS_MAP).map(([val, { label }]) => (
+                        <SelectItem key={val} value={val}>
+                          {label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -661,24 +583,17 @@ export default function AdminOrdersPage() {
       </Dialog>
 
       {/* Delete Confirm */}
-      <AlertDialog
-        open={!!deleteId}
-        onOpenChange={(v) => !v && setDeleteId(null)}
-      >
+      <AlertDialog open={!!deleteId} onOpenChange={(v) => !v && setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Xoá đơn hàng?</AlertDialogTitle>
             <AlertDialogDescription>
-              Hành động này không thể hoàn tác. Đơn hàng sẽ bị xoá khỏi hệ
-              thống.
+              Hành động này không thể hoàn tác. Đơn hàng sẽ bị xoá khỏi hệ thống.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Huỷ</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-red-600 hover:bg-red-700"
-              onClick={handleDelete}
-            >
+            <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={handleDelete}>
               Xoá
             </AlertDialogAction>
           </AlertDialogFooter>

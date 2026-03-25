@@ -1,28 +1,52 @@
-"use client";
+'use client';
 
-import Image from "next/image";
-import { useCart, type CartItem } from "@/context/cart-context";
-import { Button } from "@/components/ui/button";
-import { Trash2, Plus, Minus } from "lucide-react";
-import { formatCurrency } from "@/lib/utils";
-import Link from "next/link";
+import Image from 'next/image';
+import { useCart, type CartItem } from '@/context/cart-context';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Trash2, Plus, Minus } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 interface CartItemCardProps {
   item: CartItem;
 }
 
 export function CartItemCard({ item }: CartItemCardProps) {
-  const { updateQuantity, removeItem } = useCart();
-  const imageSrc = item.image?.trim() ? item.image : "/placeholder.svg";
+  const { updateQuantity, removeItem, isItemSelected, toggleItemSelection } = useCart();
+  const imageSrc = item.image?.trim() ? item.image : '/placeholder.svg';
+  const maxQuantity = item.stock > 0 ? item.stock : item.quantity;
+  const [quantityInput, setQuantityInput] = useState(String(item.quantity));
+  const isSelected = isItemSelected(item._id);
 
-  const handleIncreaseQuantity = () => {
-    updateQuantity(item._id, item.quantity + 1);
+  useEffect(() => {
+    setQuantityInput(String(item.quantity));
+  }, [item.quantity]);
+
+  const handleIncreaseQuantity = async () => {
+    if (item.quantity >= maxQuantity) return;
+    await updateQuantity(item._id, item.quantity + 1);
   };
 
-  const handleDecreaseQuantity = () => {
+  const handleDecreaseQuantity = async () => {
     if (item.quantity > 1) {
-      updateQuantity(item._id, item.quantity - 1);
+      await updateQuantity(item._id, item.quantity - 1);
     }
+  };
+
+  const applyQuantityInput = async () => {
+    const parsed = Number.parseInt(quantityInput, 10);
+    if (!Number.isFinite(parsed) || parsed < 1) {
+      setQuantityInput(String(item.quantity));
+      return;
+    }
+    const nextQuantity = Math.min(parsed, maxQuantity);
+    if (nextQuantity === item.quantity) {
+      setQuantityInput(String(item.quantity));
+      return;
+    }
+    await updateQuantity(item._id, nextQuantity);
   };
 
   const handleRemove = () => {
@@ -43,30 +67,32 @@ export function CartItemCard({ item }: CartItemCardProps) {
 
       <div className="flex-1 p-4 flex flex-col">
         <div className="flex justify-between">
-          <div>
-            <Link
-              href={`/shop/${item.product_id}`}
-              className="font-semibold text-lg hover:text-ocean-600 transition-colors"
-            >
-              {item.name}
-            </Link>
-            <div className="flex gap-3 mt-1">
-              {item.size && (
-                <p className="text-muted-foreground text-sm">
-                  Size:{" "}
-                  <span className="font-medium text-foreground">
-                    {item.size}
-                  </span>
-                </p>
-              )}
-              {item.color && (
-                <p className="text-muted-foreground text-sm">
-                  Màu:{" "}
-                  <span className="font-medium text-foreground">
-                    {item.color}
-                  </span>
-                </p>
-              )}
+          <div className="flex items-start gap-3">
+            <Checkbox
+              checked={isSelected}
+              onCheckedChange={(checked) => toggleItemSelection(item._id, checked === true)}
+              aria-label={`Chọn sản phẩm ${item.name} để thanh toán`}
+              className="mt-1"
+            />
+            <div>
+              <Link
+                href={`/shop/${item.product_id}`}
+                className="font-semibold text-lg hover:text-ocean-600 transition-colors"
+              >
+                {item.name}
+              </Link>
+              <div className="flex gap-3 mt-1">
+                {item.size && (
+                  <p className="text-muted-foreground text-sm">
+                    Size: <span className="font-medium text-foreground">{item.size}</span>
+                  </p>
+                )}
+                {item.color && (
+                  <p className="text-muted-foreground text-sm">
+                    Màu: <span className="font-medium text-foreground">{item.color}</span>
+                  </p>
+                )}
+              </div>
             </div>
           </div>
           <Button
@@ -81,27 +107,46 @@ export function CartItemCard({ item }: CartItemCardProps) {
         </div>
 
         <div className="mt-auto flex justify-between items-center pt-4">
-          <div className="flex items-center border rounded-md border-ocean-100">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleDecreaseQuantity}
-              disabled={item.quantity <= 1}
-              className="h-8 w-8 text-ocean-600 hover:text-ocean-700 hover:bg-ocean-50"
-            >
-              <Minus className="h-4 w-4" />
-              <span className="sr-only">Giảm số lượng</span>
-            </Button>
-            <span className="w-8 text-center">{item.quantity}</span>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleIncreaseQuantity}
-              className="h-8 w-8 text-ocean-600 hover:text-ocean-700 hover:bg-ocean-50"
-            >
-              <Plus className="h-4 w-4" />
-              <span className="sr-only">Tăng số lượng</span>
-            </Button>
+          <div>
+            <div className="flex items-center border rounded-md border-ocean-100">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleDecreaseQuantity}
+                disabled={item.quantity <= 1}
+                className="h-8 w-8 text-ocean-600 hover:text-ocean-700 hover:bg-ocean-50"
+              >
+                <Minus className="h-4 w-4" />
+                <span className="sr-only">Giảm số lượng</span>
+              </Button>
+              <input
+                type="number"
+                min={1}
+                max={maxQuantity}
+                value={quantityInput}
+                onChange={(e) => setQuantityInput(e.target.value)}
+                onBlur={applyQuantityInput}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    void applyQuantityInput();
+                  }
+                }}
+                className="w-14 h-8 text-center text-sm bg-transparent outline-none"
+                aria-label="Số lượng sản phẩm"
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleIncreaseQuantity}
+                disabled={item.quantity >= maxQuantity}
+                className="h-8 w-8 text-ocean-600 hover:text-ocean-700 hover:bg-ocean-50"
+              >
+                <Plus className="h-4 w-4" />
+                <span className="sr-only">Tăng số lượng</span>
+              </Button>
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">Còn {maxQuantity} sản phẩm</p>
           </div>
 
           <div className="text-right">

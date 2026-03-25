@@ -1,23 +1,15 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { subscribeNewsletter } from "@/service/newsletter";
-import { toast } from "sonner";
-import {
-  Facebook,
-  Instagram,
-  Twitter,
-  Youtube,
-  Mail,
-  Phone,
-  MapPin,
-} from "lucide-react";
-import Link from "next/link";
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { subscribeNewsletter } from '@/service/newsletter';
+import { toast } from 'sonner';
+import { Facebook, Instagram, Twitter, Youtube, Mail, Phone, MapPin } from 'lucide-react';
+import Link from 'next/link';
 
 export function Footer() {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubscribe = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -25,19 +17,17 @@ export function Footer() {
 
     const normalized = email.trim();
     if (!normalized) {
-      toast.error("Vui lòng nhập email");
+      toast.error('Vui lòng nhập email');
       return;
     }
 
     setIsSubmitting(true);
     try {
       await subscribeNewsletter(normalized);
-      setEmail("");
-      toast.success("Đăng ký nhận bản tin thành công");
+      setEmail('');
+      toast.success('Đăng ký nhận bản tin thành công');
     } catch (error: any) {
-      toast.error(
-        error?.response?.data?.message || "Không thể đăng ký nhận bản tin",
-      );
+      toast.error(error?.response?.data?.message || 'Không thể đăng ký nhận bản tin');
     } finally {
       setIsSubmitting(false);
     }
@@ -51,13 +41,11 @@ export function Footer() {
           <div className="space-y-4 lg:col-span-2">
             <div>
               <h3 className="text-xl font-bold mb-2">TrendVibe</h3>
-              <p className="text-xs text-gray-500 uppercase tracking-widest mb-4">
-                THEME
-              </p>
+              <p className="text-xs text-gray-500 uppercase tracking-widest mb-4">THEME</p>
             </div>
             <p className="text-sm text-gray-600">
-              Khám phá xu hướng thời trang mới nhất. Đăng ký nhận bản tin để
-              nhận ưu đãi độc quyền và cập nhật mới.
+              Khám phá xu hướng thời trang mới nhất. Đăng ký nhận bản tin để nhận ưu đãi độc quyền
+              và cập nhật mới.
             </p>
             <form className="flex gap-2" onSubmit={handleSubscribe}>
               <Input
@@ -73,31 +61,43 @@ export function Footer() {
                 disabled={isSubmitting}
                 type="submit"
               >
-                {isSubmitting ? "Đang gửi..." : "Đăng ký"}
+                {isSubmitting ? 'Đang gửi...' : 'Đăng ký'}
               </Button>
             </form>
             <div className="flex gap-4 pt-4">
               <Link
-                href="#"
-                className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center hover:bg-gray-700 transition-colors"
+                href="https://www.facebook.com/h.10010.10"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center hover:bg-blue-600 transition-colors"
+                aria-label="Facebook"
               >
                 <Facebook className="h-4 w-4 text-white" />
               </Link>
               <Link
-                href="#"
-                className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center hover:bg-gray-700 transition-colors"
+                href="https://www.facebook.com/h.10010.10"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center hover:bg-blue-600 transition-colors"
+                aria-label="Instagram"
               >
                 <Instagram className="h-4 w-4 text-white" />
               </Link>
               <Link
-                href="#"
-                className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center hover:bg-gray-700 transition-colors"
+                href="https://www.facebook.com/h.10010.10"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center hover:bg-blue-600 transition-colors"
+                aria-label="Twitter"
               >
                 <Twitter className="h-4 w-4 text-white" />
               </Link>
               <Link
-                href="#"
-                className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center hover:bg-gray-700 transition-colors"
+                href="https://www.facebook.com/h.10010.10"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-8 h-8 rounded-full bg-gray-900 flex items-center justify-center hover:bg-blue-600 transition-colors"
+                aria-label="YouTube"
               >
                 <Youtube className="h-4 w-4 text-white" />
               </Link>
@@ -106,39 +106,25 @@ export function Footer() {
 
           {/* Shop */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wider">
-              Cửa hàng
-            </h3>
+            <h3 className="text-sm font-semibold uppercase tracking-wider">Cửa hàng</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link
-                  href="/shop"
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
-                >
+                <Link href="/shop" className="text-gray-600 hover:text-gray-900 transition-colors">
                   Hàng mới về
                 </Link>
               </li>
               <li>
-                <Link
-                  href="/shop"
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
-                >
+                <Link href="/shop" className="text-gray-600 hover:text-gray-900 transition-colors">
                   Bộ sưu tập Nam
                 </Link>
               </li>
               <li>
-                <Link
-                  href="/shop"
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
-                >
+                <Link href="/shop" className="text-gray-600 hover:text-gray-900 transition-colors">
                   Bộ sưu tập Nữ
                 </Link>
               </li>
               <li>
-                <Link
-                  href="/shop"
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
-                >
+                <Link href="/shop" className="text-gray-600 hover:text-gray-900 transition-colors">
                   Giảm giá
                 </Link>
               </li>
@@ -147,15 +133,10 @@ export function Footer() {
 
           {/* Customer Service */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wider">
-              Dịch vụ khách hàng
-            </h3>
+            <h3 className="text-sm font-semibold uppercase tracking-wider">Dịch vụ khách hàng</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link
-                  href="/about"
-                  className="text-gray-600 hover:text-gray-900 transition-colors"
-                >
+                <Link href="/about" className="text-gray-600 hover:text-gray-900 transition-colors">
                   Về chúng tôi
                 </Link>
               </li>
@@ -188,9 +169,7 @@ export function Footer() {
 
           {/* Contact Info */}
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold uppercase tracking-wider">
-              Liên hệ
-            </h3>
+            <h3 className="text-sm font-semibold uppercase tracking-wider">Liên hệ</h3>
             <ul className="space-y-3 text-sm text-gray-600">
               <li className="flex items-start gap-2">
                 <MapPin className="h-4 w-4 mt-1 flex-shrink-0" />

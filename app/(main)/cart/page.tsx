@@ -1,16 +1,27 @@
-"use client";
+'use client';
 
-import { useCart } from "@/context/cart-context";
-import { CartItemCard } from "@/components/cart/cart-item-card";
-import { CartSummary } from "@/components/cart/cart-summary";
-import { EmptyCart } from "@/components/cart/empty-cart";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import { Loader2 } from "lucide-react";
+import { useCart } from '@/context/cart-context';
+import { CartItemCard } from '@/components/cart/cart-item-card';
+import { CartSummary } from '@/components/cart/cart-summary';
+import { EmptyCart } from '@/components/cart/empty-cart';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import Link from 'next/link';
+import { Loader2 } from 'lucide-react';
 
 export default function CartPage() {
-  const { items, getCartCount, isLoading, clearCart } = useCart();
+  const {
+    items,
+    selectedItemIds,
+    getCartCount,
+    getSelectedCount,
+    isLoading,
+    clearCart,
+    toggleSelectAll,
+  } = useCart();
   const cartCount = getCartCount();
+  const selectedCount = getSelectedCount();
+  const isAllSelected = items.length > 0 && selectedItemIds.length === items.length;
 
   if (isLoading) {
     return (
@@ -27,12 +38,25 @@ export default function CartPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">
-        Giỏ hàng của bạn ({cartCount}{" "}
-        {cartCount === 1 ? "sản phẩm" : "sản phẩm"})
+        Giỏ hàng của bạn ({cartCount} {cartCount === 1 ? 'sản phẩm' : 'sản phẩm'})
       </h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
+          <div className="mb-4 flex items-center justify-between rounded-lg border border-ocean-100 bg-white px-4 py-3">
+            <label className="flex items-center gap-2 text-sm font-medium text-ocean-700">
+              <Checkbox
+                checked={isAllSelected}
+                onCheckedChange={(checked) => toggleSelectAll(checked === true)}
+                aria-label="Chọn tất cả sản phẩm trong giỏ hàng"
+              />
+              Chọn tất cả
+            </label>
+            <span className="text-sm text-muted-foreground">
+              Đã chọn {selectedCount} sản phẩm để thanh toán
+            </span>
+          </div>
+
           <div className="space-y-4">
             {items.map((item) => (
               <CartItemCard key={item._id} item={item} />

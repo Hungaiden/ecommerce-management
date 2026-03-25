@@ -1,23 +1,23 @@
-"use client";
+'use client';
 
-import { useCart } from "@/context/cart-context";
-import { formatCurrency } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
-import Link from "next/link";
+import { useCart } from '@/context/cart-context';
+import { formatCurrency } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 
 export function CartSummary() {
-  const { getCartTotal } = useCart();
-  const subtotal = getCartTotal();
+  const { getSelectedTotal, getSelectedCount } = useCart();
+  const selectedCount = getSelectedCount();
+  const subtotal = getSelectedTotal();
   const tax = subtotal * 0.1; // 10% tax
   const shipping = subtotal > 0 ? 15 : 0; // $15 shipping fee if cart is not empty
   const total = subtotal + tax + shipping;
 
   return (
     <div className="border rounded-lg p-6 bg-card border-ocean-100 shadow-sm">
-      <h2 className="text-xl font-semibold mb-6 text-ocean-700">
-        Tóm tắt đơn hàng
-      </h2>
+      <h2 className="text-xl font-semibold mb-6 text-ocean-700">Tóm tắt đơn hàng</h2>
+      <p className="mb-4 text-sm text-muted-foreground">{selectedCount} sản phẩm đã chọn</p>
 
       <div className="space-y-4">
         <div className="flex justify-between">
@@ -33,7 +33,7 @@ export function CartSummary() {
         <div className="flex justify-between">
           <span className="text-muted-foreground">Phí vận chuyển</span>
           <span className="font-medium">
-            {shipping > 0 ? formatCurrency(shipping) : "Miễn phí"}
+            {shipping > 0 ? formatCurrency(shipping) : 'Miễn phí'}
           </span>
         </div>
 

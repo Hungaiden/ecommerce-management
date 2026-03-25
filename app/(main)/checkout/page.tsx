@@ -1,46 +1,46 @@
-"use client";
+'use client';
 
-import type React from "react";
+import type React from 'react';
 
-import { useState, useEffect } from "react";
-import { useCart } from "@/context/cart-context";
-import { useAuth } from "@/context/AuthContext";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Separator } from "@/components/ui/separator";
-import { Textarea } from "@/components/ui/textarea";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from 'react';
+import { useCart } from '@/context/cart-context';
+import { useAuth } from '@/context/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
+import { useRouter } from 'next/navigation';
+import { Banknote, Building2, Loader2, ShoppingBag, Wallet } from 'lucide-react';
+import { toast } from 'sonner';
+import { createOrder } from '@/service/orders';
+import { createVNPayPaymentUrl } from '@/service/payment';
+import Image from 'next/image';
 import {
-  Banknote,
-  Building2,
-  Loader2,
-  ShoppingBag,
-  Wallet,
-} from "lucide-react";
-import { toast } from "sonner";
-import { createOrder } from "@/service/orders";
-import { createVNPayPaymentUrl } from "@/service/payment";
-import Image from "next/image";
+  incrementDiscountUsage,
+  validateDiscountCode,
+  type ValidateDiscountResponse,
+} from '@/service/admin/discounts';
 
 export default function CheckoutPage() {
-  const { items, clearCart } = useCart();
+  const { selectedItems, removeSelectedItems } = useCart();
   const { user } = useAuth();
   const router = useRouter();
   const [isProcessing, setIsProcessing] = useState(false);
   const [isOrderPlaced, setIsOrderPlaced] = useState(false);
 
   // Contact form
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [address, setAddress] = useState("");
-  const [note, setNote] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<
-    "cash" | "bank_transfer" | "vnpay"
-  >("cash");
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [address, setAddress] = useState('');
+  const [note, setNote] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'bank_transfer' | 'vnpay'>('cash');
+  const [discountCodeInput, setDiscountCodeInput] = useState('');
+  const [isApplyingDiscount, setIsApplyingDiscount] = useState(false);
+  const [appliedDiscount, setAppliedDiscount] = useState<ValidateDiscountResponse | null>(null);
 
   // Pre-fill from auth
   useEffect(() => {
@@ -52,23 +52,51 @@ export default function CheckoutPage() {
 
   // Redirect if empty cart (but not while processing or right after placing an order)
   useEffect(() => {
-    if (items.length === 0 && !isProcessing && !isOrderPlaced) {
-      router.replace("/cart");
+    if (selectedItems.length === 0 && !isProcessing && !isOrderPlaced) {
+      router.replace('/cart');
     }
-  }, [items, router, isProcessing, isOrderPlaced]);
+  }, [selectedItems, router, isProcessing, isOrderPlaced]);
 
-  const totalPrice = items.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0,
-  );
+  const totalPrice = selectedItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const discountAmount = Math.min(appliedDiscount?.discountAmount ?? 0, totalPrice);
+  const finalTotalPrice = Math.max(totalPrice - discountAmount, 0);
+
+  const handleApplyDiscount = async () => {
+    const code = discountCodeInput.trim().toUpperCase();
+    if (!code) {
+      toast.error('Vui lòng nhập mã khuyến mãi');
+      return;
+    }
+
+    setIsApplyingDiscount(true);
+    try {
+      const result = await validateDiscountCode(code, totalPrice);
+      setAppliedDiscount(result);
+      setDiscountCodeInput(result.code);
+      toast.success('Áp dụng mã khuyến mãi thành công');
+    } catch (err: any) {
+      setAppliedDiscount(null);
+      toast.error(
+        err?.response?.data?.message ?? 'Không thể áp dụng mã khuyến mãi. Vui lòng thử lại.',
+      );
+    } finally {
+      setIsApplyingDiscount(false);
+    }
+  };
+
+  const handleRemoveDiscount = () => {
+    setAppliedDiscount(null);
+    setDiscountCodeInput('');
+    toast.success('Đã hủy mã khuyến mãi');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (items.length === 0) return;
+    if (selectedItems.length === 0) return;
     setIsProcessing(true);
     try {
       const order = await createOrder({
-        items: items.map((item) => ({
+        items: selectedItems.map((item) => ({
           product_id: item.product_id,
           name: item.name,
           thumbnail: item.image,
@@ -81,56 +109,63 @@ export default function CheckoutPage() {
         })),
         contact_info: { name, phone, email, address },
         note,
-        total_price: totalPrice,
+        total_price: finalTotalPrice,
+        discount_id: appliedDiscount?.discountId,
+        discount_code: appliedDiscount?.code,
+        discount_amount: discountAmount,
         payment_method: paymentMethod,
       });
 
       const orderId = order?._id;
       if (!orderId) {
-        throw new Error("Không thể lấy mã đơn hàng sau khi thanh toán.");
+        throw new Error('Không thể lấy mã đơn hàng sau khi thanh toán.');
+      }
+
+      if (appliedDiscount?.discountId) {
+        try {
+          await incrementDiscountUsage(appliedDiscount.discountId);
+        } catch {
+          // Do not block checkout success if usage tracking fails.
+        }
       }
 
       setIsOrderPlaced(true);
 
-      if (paymentMethod === "vnpay") {
+      if (paymentMethod === 'vnpay') {
         try {
           const paymentUrl = await createVNPayPaymentUrl(orderId);
-          clearCart().catch(() => {});
+          removeSelectedItems(selectedItems.map((item) => item._id)).catch(() => {});
           window.location.assign(paymentUrl);
           return;
         } catch {
           toast.error(
-            "Don hang da tao nhung khong lay duoc link VNPay. Vui long vao Don hang cua toi de xu ly tiep.",
+            'Don hang da tao nhung khong lay duoc link VNPay. Vui long vao Don hang cua toi de xu ly tiep.',
           );
-          router.push("/bookings");
+          router.push('/bookings');
           return;
         }
       }
 
       // Navigate first, then clear cart (to avoid empty-cart redirect firing before navigation)
-      if (paymentMethod === "bank_transfer") {
-        toast.success(
-          "Đặt hàng thành công. Vui lòng chuyển khoản để xác nhận.",
-        );
+      if (paymentMethod === 'bank_transfer') {
+        toast.success('Đặt hàng thành công. Vui lòng chuyển khoản để xác nhận.');
         router.push(
-          `/checkout/bank-transfer?orderId=${encodeURIComponent(orderId)}&amount=${encodeURIComponent(totalPrice.toString())}`,
+          `/checkout/bank-transfer?orderId=${encodeURIComponent(orderId)}&amount=${encodeURIComponent(finalTotalPrice.toString())}`,
         );
       } else {
-        toast.success("Đặt hàng COD thành công!");
+        toast.success('Đặt hàng COD thành công!');
         router.push(`/checkout/success?orderId=${encodeURIComponent(orderId)}`);
       }
 
-      clearCart().catch(() => {});
+      removeSelectedItems(selectedItems.map((item) => item._id)).catch(() => {});
     } catch (err: any) {
-      toast.error(
-        err?.response?.data?.message ?? "Đặt hàng thất bại. Vui lòng thử lại.",
-      );
+      toast.error(err?.response?.data?.message ?? 'Đặt hàng thất bại. Vui lòng thử lại.');
     } finally {
       setIsProcessing(false);
     }
   };
 
-  if (items.length === 0 && !isOrderPlaced) return null;
+  if (selectedItems.length === 0 && !isOrderPlaced) return null;
 
   return (
     <div className="container mx-auto px-4 py-8 md:py-12">
@@ -212,20 +247,14 @@ export default function CheckoutPage() {
                 <CardContent>
                   <RadioGroup
                     value={paymentMethod}
-                    onValueChange={(v) =>
-                      setPaymentMethod(v as "cash" | "bank_transfer" | "vnpay")
-                    }
+                    onValueChange={(v) => setPaymentMethod(v as 'cash' | 'bank_transfer' | 'vnpay')}
                     className="space-y-3"
                   >
                     <div
-                      className={`flex items-start gap-3 p-4 border rounded-lg cursor-pointer transition-colors ${paymentMethod === "cash" ? "border-primary bg-primary/5" : "border-border"}`}
-                      onClick={() => setPaymentMethod("cash")}
+                      className={`flex items-start gap-3 p-4 border rounded-lg cursor-pointer transition-colors ${paymentMethod === 'cash' ? 'border-primary bg-primary/5' : 'border-border'}`}
+                      onClick={() => setPaymentMethod('cash')}
                     >
-                      <RadioGroupItem
-                        value="cash"
-                        id="cash"
-                        className="mt-0.5"
-                      />
+                      <RadioGroupItem value="cash" id="cash" className="mt-0.5" />
                       <div className="flex-1">
                         <Label
                           htmlFor="cash"
@@ -241,14 +270,10 @@ export default function CheckoutPage() {
                     </div>
 
                     <div
-                      className={`flex items-start gap-3 p-4 border rounded-lg cursor-pointer transition-colors ${paymentMethod === "vnpay" ? "border-primary bg-primary/5" : "border-border"}`}
-                      onClick={() => setPaymentMethod("vnpay")}
+                      className={`flex items-start gap-3 p-4 border rounded-lg cursor-pointer transition-colors ${paymentMethod === 'vnpay' ? 'border-primary bg-primary/5' : 'border-border'}`}
+                      onClick={() => setPaymentMethod('vnpay')}
                     >
-                      <RadioGroupItem
-                        value="vnpay"
-                        id="vnpay"
-                        className="mt-0.5"
-                      />
+                      <RadioGroupItem value="vnpay" id="vnpay" className="mt-0.5" />
                       <div className="flex-1">
                         <Label
                           htmlFor="vnpay"
@@ -258,21 +283,16 @@ export default function CheckoutPage() {
                           Thanh toan VNPay
                         </Label>
                         <p className="text-sm text-muted-foreground mt-1">
-                          Thanh toan online qua cong VNPay, ho tro app ngan hang
-                          va the noi dia.
+                          Thanh toan online qua cong VNPay, ho tro app ngan hang va the noi dia.
                         </p>
                       </div>
                     </div>
 
                     <div
-                      className={`flex items-start gap-3 p-4 border rounded-lg cursor-pointer transition-colors ${paymentMethod === "bank_transfer" ? "border-primary bg-primary/5" : "border-border"}`}
-                      onClick={() => setPaymentMethod("bank_transfer")}
+                      className={`flex items-start gap-3 p-4 border rounded-lg cursor-pointer transition-colors ${paymentMethod === 'bank_transfer' ? 'border-primary bg-primary/5' : 'border-border'}`}
+                      onClick={() => setPaymentMethod('bank_transfer')}
                     >
-                      <RadioGroupItem
-                        value="bank_transfer"
-                        id="bank_transfer"
-                        className="mt-0.5"
-                      />
+                      <RadioGroupItem value="bank_transfer" id="bank_transfer" className="mt-0.5" />
                       <div className="flex-1">
                         <Label
                           htmlFor="bank_transfer"
@@ -282,12 +302,53 @@ export default function CheckoutPage() {
                           Chuyển khoản ngân hàng
                         </Label>
                         <p className="text-sm text-muted-foreground mt-1">
-                          Chuyển khoản qua ngân hàng. Thông tin tài khoản sẽ
-                          hiển thị sau khi đặt hàng.
+                          Chuyển khoản qua ngân hàng. Thông tin tài khoản sẽ hiển thị sau khi đặt
+                          hàng.
                         </p>
                       </div>
                     </div>
                   </RadioGroup>
+                </CardContent>
+              </Card>
+
+              {/* Discount code */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Mã khuyến mãi</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex gap-2">
+                    <Input
+                      value={discountCodeInput}
+                      onChange={(e) => setDiscountCodeInput(e.target.value)}
+                      placeholder="Nhập mã khuyến mãi"
+                      className="uppercase"
+                      disabled={isApplyingDiscount}
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleApplyDiscount}
+                      disabled={isApplyingDiscount}
+                    >
+                      {isApplyingDiscount ? 'Đang áp dụng...' : 'Áp dụng'}
+                    </Button>
+                    {appliedDiscount && (
+                      <Button type="button" variant="ghost" onClick={handleRemoveDiscount}>
+                        Bỏ mã
+                      </Button>
+                    )}
+                  </div>
+                  {appliedDiscount && (
+                    <div className="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-700">
+                      <p>
+                        Đã áp dụng mã <strong>{appliedDiscount.code}</strong>.
+                      </p>
+                      <p>
+                        Giảm: <strong>{discountAmount.toLocaleString('vi-VN')}₫</strong>
+                      </p>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
 
@@ -296,59 +357,56 @@ export default function CheckoutPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <ShoppingBag className="h-4 w-4" />
-                    Đơn hàng ({items.length} sản phẩm)
+                    Đơn hàng ({selectedItems.length} sản phẩm)
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  {items.map((item) => (
+                  {selectedItems.map((item) => (
                     <div key={item._id} className="flex items-center gap-3">
                       <div className="relative h-12 w-12 rounded overflow-hidden bg-muted flex-shrink-0">
-                        <Image
-                          src={item.image}
-                          alt={item.name}
-                          fill
-                          className="object-cover"
-                        />
+                        <Image src={item.image} alt={item.name} fill className="object-cover" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium truncate">
-                          {item.name}
-                        </p>
+                        <p className="text-sm font-medium truncate">{item.name}</p>
                         <p className="text-xs text-muted-foreground">
                           {item.size && `Size: ${item.size}`}
                           {item.color && ` / ${item.color}`} × {item.quantity}
                         </p>
                       </div>
                       <span className="text-sm font-medium whitespace-nowrap">
-                        {(item.price * item.quantity).toLocaleString("vi-VN")}₫
+                        {(item.price * item.quantity).toLocaleString('vi-VN')}₫
                       </span>
                     </div>
                   ))}
                   <Separator />
+                  {appliedDiscount && (
+                    <>
+                      <div className="flex justify-between text-green-700">
+                        <span>Giảm giá ({appliedDiscount.code})</span>
+                        <span>-{discountAmount.toLocaleString('vi-VN')}₫</span>
+                      </div>
+                      <Separator />
+                    </>
+                  )}
                   <div className="flex justify-between font-semibold">
                     <span>Tổng cộng</span>
-                    <span>{totalPrice.toLocaleString("vi-VN")}₫</span>
+                    <span>{finalTotalPrice.toLocaleString('vi-VN')}₫</span>
                   </div>
                 </CardContent>
               </Card>
 
-              <Button
-                type="submit"
-                className="w-full"
-                size="lg"
-                disabled={isProcessing}
-              >
+              <Button type="submit" className="w-full" size="lg" disabled={isProcessing}>
                 {isProcessing ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Đang xử lý...
                   </>
-                ) : paymentMethod === "bank_transfer" ? (
+                ) : paymentMethod === 'bank_transfer' ? (
                   <>
                     <Building2 className="mr-2 h-4 w-4" />
                     Đặt hàng &amp; Xem thông tin chuyển khoản
                   </>
-                ) : paymentMethod === "vnpay" ? (
+                ) : paymentMethod === 'vnpay' ? (
                   <>
                     <Wallet className="mr-2 h-4 w-4" />
                     Dat hang &amp; Thanh toan VNPay
@@ -370,32 +428,25 @@ export default function CheckoutPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <ShoppingBag className="h-4 w-4" />
-                Đơn hàng ({items.length} sản phẩm)
+                Đơn hàng ({selectedItems.length} sản phẩm)
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
-                {items.map((item) => (
+                {selectedItems.map((item) => (
                   <div key={item._id} className="flex items-center gap-3">
                     <div className="relative h-12 w-12 rounded overflow-hidden bg-muted flex-shrink-0">
-                      <Image
-                        src={item.image}
-                        alt={item.name}
-                        fill
-                        className="object-cover"
-                      />
+                      <Image src={item.image} alt={item.name} fill className="object-cover" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">
-                        {item.name}
-                      </p>
+                      <p className="text-sm font-medium truncate">{item.name}</p>
                       <p className="text-xs text-muted-foreground">
                         {item.size && `Size: ${item.size}`}
                         {item.color && ` / ${item.color}`} × {item.quantity}
                       </p>
                     </div>
                     <span className="text-sm font-medium whitespace-nowrap">
-                      {(item.price * item.quantity).toLocaleString("vi-VN")}₫
+                      {(item.price * item.quantity).toLocaleString('vi-VN')}₫
                     </span>
                   </div>
                 ))}
@@ -404,19 +455,23 @@ export default function CheckoutPage() {
               <div className="space-y-1 text-sm">
                 <div className="flex justify-between text-muted-foreground">
                   <span>Tạm tính</span>
-                  <span>{totalPrice.toLocaleString("vi-VN")}₫</span>
+                  <span>{totalPrice.toLocaleString('vi-VN')}₫</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>Phí vận chuyển</span>
                   <span>Miễn phí</span>
                 </div>
+                {appliedDiscount && (
+                  <div className="flex justify-between text-green-700">
+                    <span>Giảm giá ({appliedDiscount.code})</span>
+                    <span>-{discountAmount.toLocaleString('vi-VN')}₫</span>
+                  </div>
+                )}
               </div>
               <Separator />
               <div className="flex justify-between font-semibold text-base">
                 <span>Tổng cộng</span>
-                <span className="text-primary">
-                  {totalPrice.toLocaleString("vi-VN")}₫
-                </span>
+                <span className="text-primary">{finalTotalPrice.toLocaleString('vi-VN')}₫</span>
               </div>
             </CardContent>
           </Card>
