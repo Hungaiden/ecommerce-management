@@ -15,8 +15,8 @@ export function CartSummary() {
   const total = subtotal + tax + shipping;
 
   return (
-    <div className="border rounded-lg p-6 bg-card border-ocean-100 shadow-sm">
-      <h2 className="text-xl font-semibold mb-6 text-ocean-700">Tóm tắt đơn hàng</h2>
+    <div className="border rounded-lg p-6 bg-card border-gray-200 shadow-sm">
+      <h2 className="text-xl font-semibold mb-6 text-black">Tóm tắt đơn hàng</h2>
       <p className="mb-4 text-sm text-muted-foreground">{selectedCount} sản phẩm đã chọn</p>
 
       <div className="space-y-4">
@@ -37,15 +37,15 @@ export function CartSummary() {
           </span>
         </div>
 
-        <div className="border-t border-ocean-100 pt-4 mt-2">
+        <div className="border-t border-gray-200 pt-4 mt-2">
           <div className="flex justify-between font-semibold text-lg">
             <span>Tổng cộng</span>
-            <span className="text-ocean-700">{formatCurrency(total)}</span>
+            <span className="text-black">{formatCurrency(total)}</span>
           </div>
         </div>
 
         <Button
-          className="w-full mt-4 bg-ocean-600 hover:bg-ocean-700 text-white"
+          className="w-full mt-4 bg-black hover:bg-gray-900 text-white"
           size="lg"
           disabled={subtotal === 0}
           asChild

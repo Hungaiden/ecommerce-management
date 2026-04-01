@@ -54,7 +54,7 @@ export function CartItemCard({ item }: CartItemCardProps) {
   };
 
   return (
-    <div className="flex flex-col sm:flex-row border rounded-lg overflow-hidden bg-card border-ocean-100 transition-all duration-300 hover:shadow-md group">
+    <div className="flex flex-col sm:flex-row border rounded-lg overflow-hidden bg-card border-gray-200 transition-all duration-300 hover:shadow-md group">
       <div className="relative w-full sm:w-48 h-48">
         <Image
           src={imageSrc}
@@ -77,7 +77,7 @@ export function CartItemCard({ item }: CartItemCardProps) {
             <div>
               <Link
                 href={`/shop/${item.product_id}`}
-                className="font-semibold text-lg hover:text-ocean-600 transition-colors"
+                className="font-semibold text-lg hover:text-black transition-colors"
               >
                 {item.name}
               </Link>
@@ -108,13 +108,13 @@ export function CartItemCard({ item }: CartItemCardProps) {
 
         <div className="mt-auto flex justify-between items-center pt-4">
           <div>
-            <div className="flex items-center border rounded-md border-ocean-100">
+            <div className="flex items-center border rounded-md border-gray-200">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={handleDecreaseQuantity}
                 disabled={item.quantity <= 1}
-                className="h-8 w-8 text-ocean-600 hover:text-ocean-700 hover:bg-ocean-50"
+                className="h-8 w-8 text-black hover:text-gray-700 hover:bg-gray-100"
               >
                 <Minus className="h-4 w-4" />
                 <span className="sr-only">Giảm số lượng</span>
@@ -140,7 +140,7 @@ export function CartItemCard({ item }: CartItemCardProps) {
                 size="icon"
                 onClick={handleIncreaseQuantity}
                 disabled={item.quantity >= maxQuantity}
-                className="h-8 w-8 text-ocean-600 hover:text-ocean-700 hover:bg-ocean-50"
+                className="h-8 w-8 text-black hover:text-gray-700 hover:bg-gray-100"
               >
                 <Plus className="h-4 w-4" />
                 <span className="sr-only">Tăng số lượng</span>
@@ -150,9 +150,7 @@ export function CartItemCard({ item }: CartItemCardProps) {
           </div>
 
           <div className="text-right">
-            <p className="font-medium text-ocean-700">
-              {formatCurrency(item.price * item.quantity)}
-            </p>
+            <p className="font-medium text-black">{formatCurrency(item.price * item.quantity)}</p>
             <p className="text-sm text-muted-foreground">
               {item.quantity > 1 && `${formatCurrency(item.price)} / sản phẩm`}
             </p>

@@ -26,7 +26,7 @@ export default function CartPage() {
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-16 flex justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-ocean-600" />
+        <Loader2 className="h-8 w-8 animate-spin text-black" />
       </div>
     );
   }
@@ -43,8 +43,8 @@ export default function CartPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-          <div className="mb-4 flex items-center justify-between rounded-lg border border-ocean-100 bg-white px-4 py-3">
-            <label className="flex items-center gap-2 text-sm font-medium text-ocean-700">
+          <div className="mb-4 flex items-center justify-between rounded-lg border border-gray-200 bg-white px-4 py-3">
+            <label className="flex items-center gap-2 text-sm font-medium text-black">
               <Checkbox
                 checked={isAllSelected}
                 onCheckedChange={(checked) => toggleSelectAll(checked === true)}

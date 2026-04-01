@@ -1,58 +1,98 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Separator } from "@/components/ui/separator";
-import { Facebook, Github, Twitter } from "lucide-react";
-import Link from "next/link";
-import { useState } from "react";
-import { register } from "@/service/register";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Separator } from '@/components/ui/separator';
+import { Facebook, Github, Twitter } from 'lucide-react';
+import Link from 'next/link';
+import { useState } from 'react';
+import { register } from '@/service/register';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import {
+  validateFullName,
+  validateEmail,
+  validatePhoneNumber,
+  validatePassword,
+  validateConfirmPassword,
+  trimInput,
+} from '@/lib/validations/form';
 
 export default function RegisterPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    phone: "",
-    avatar: "",
-    role_id: "customer", // enum backend: 'admin' | 'staff' | 'customer'
-    status: "active", // Mặc định là active
+    fullName: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    phone: '',
+    avatar: '',
+    role_id: 'customer', // enum backend: 'admin' | 'staff' | 'customer'
+    status: 'active', // Mặc định là active
   });
+
+  // Validation errors state
+  const [errors, setErrors] = useState<{
+    fullName?: string;
+    email?: string;
+    phone?: string;
+    password?: string;
+    confirmPassword?: string;
+  }>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Kiểm tra mật khẩu
-    if (formData.password !== formData.confirmPassword) {
-      toast.error("Mật khẩu xác nhận không khớp!");
+    // Reset errors
+    setErrors({});
+
+    // Validate all fields
+    const fullNameValidation = validateFullName(formData.fullName);
+    const emailValidation = validateEmail(formData.email);
+    const phoneValidation = validatePhoneNumber(formData.phone);
+    const passwordValidation = validatePassword(formData.password);
+    const confirmPasswordValidation = validateConfirmPassword(
+      formData.password,
+      formData.confirmPassword,
+    );
+
+    // Collect errors
+    const newErrors: typeof errors = {};
+    if (!fullNameValidation.valid) newErrors.fullName = fullNameValidation.error;
+    if (!emailValidation.valid) newErrors.email = emailValidation.error;
+    if (!phoneValidation.valid) newErrors.phone = phoneValidation.error;
+    if (!passwordValidation.valid) newErrors.password = passwordValidation.error;
+    if (!confirmPasswordValidation.valid)
+      newErrors.confirmPassword = confirmPasswordValidation.error;
+
+    // If there are any errors, show them and return
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      toast.error('Vui lòng kiểm tra lại các trường');
       return;
     }
 
     try {
       setLoading(true);
       await register(
-        formData.fullName,
-        formData.email,
+        trimInput(formData.fullName),
+        trimInput(formData.email),
         formData.password,
         formData.confirmPassword,
-        formData.phone,
+        trimInput(formData.phone),
         formData.avatar,
         formData.role_id,
         formData.status,
       );
 
-      toast.success("Đăng ký thành công!");
+      toast.success('Đăng ký thành công!');
       // Chuyển hướng về trang đăng nhập
-      router.push("/login");
+      router.push('/login');
     } catch (error: any) {
-      toast.error(error.response?.data?.message || "Đăng ký thất bại!");
+      toast.error(error.response?.data?.message || 'Đăng ký thất bại!');
     } finally {
       setLoading(false);
     }
@@ -80,14 +120,26 @@ export default function RegisterPage() {
                   id="fullName"
                   placeholder="Nguyễn Văn A"
                   value={formData.fullName}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const value = e.target.value;
                     setFormData({
                       ...formData,
-                      fullName: e.target.value,
-                    })
-                  }
+                      fullName: value,
+                    });
+                    // Validate on change
+                    if (value) {
+                      const validation = validateFullName(value);
+                      if (validation.valid) {
+                        setErrors({ ...errors, fullName: undefined });
+                      } else {
+                        setErrors({ ...errors, fullName: validation.error });
+                      }
+                    }
+                  }}
+                  className={errors.fullName ? 'border-red-500' : ''}
                   required
                 />
+                {errors.fullName && <p className="text-sm text-red-500">{errors.fullName}</p>}
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
@@ -96,14 +148,26 @@ export default function RegisterPage() {
                   type="email"
                   placeholder="name@example.com"
                   value={formData.email}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const value = e.target.value;
                     setFormData({
                       ...formData,
-                      email: e.target.value,
-                    })
-                  }
+                      email: value,
+                    });
+                    // Validate on change
+                    if (value) {
+                      const validation = validateEmail(value);
+                      if (validation.valid) {
+                        setErrors({ ...errors, email: undefined });
+                      } else {
+                        setErrors({ ...errors, email: validation.error });
+                      }
+                    }
+                  }}
+                  className={errors.email ? 'border-red-500' : ''}
                   required
                 />
+                {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="phone">Số điện thoại</Label>
@@ -112,14 +176,26 @@ export default function RegisterPage() {
                   type="tel"
                   placeholder="0123456789"
                   value={formData.phone}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const value = e.target.value;
                     setFormData({
                       ...formData,
-                      phone: e.target.value,
-                    })
-                  }
+                      phone: value,
+                    });
+                    // Validate on change
+                    if (value) {
+                      const validation = validatePhoneNumber(value);
+                      if (validation.valid) {
+                        setErrors({ ...errors, phone: undefined });
+                      } else {
+                        setErrors({ ...errors, phone: validation.error });
+                      }
+                    }
+                  }}
+                  className={errors.phone ? 'border-red-500' : ''}
                   required
                 />
+                {errors.phone && <p className="text-sm text-red-500">{errors.phone}</p>}
               </div>
               {/* <div className="grid gap-2">
                                 <Label htmlFor="avatar">Avatar URL</Label>
@@ -142,14 +218,26 @@ export default function RegisterPage() {
                   id="password"
                   type="password"
                   value={formData.password}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const value = e.target.value;
                     setFormData({
                       ...formData,
-                      password: e.target.value,
-                    })
-                  }
+                      password: value,
+                    });
+                    // Validate on change
+                    if (value) {
+                      const validation = validatePassword(value);
+                      if (validation.valid) {
+                        setErrors({ ...errors, password: undefined });
+                      } else {
+                        setErrors({ ...errors, password: validation.error });
+                      }
+                    }
+                  }}
+                  className={errors.password ? 'border-red-500' : ''}
                   required
                 />
+                {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="confirm-password">Xác nhận mật khẩu</Label>
@@ -157,36 +245,52 @@ export default function RegisterPage() {
                   id="confirm-password"
                   type="password"
                   value={formData.confirmPassword}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    const value = e.target.value;
                     setFormData({
                       ...formData,
-                      confirmPassword: e.target.value,
-                    })
-                  }
+                      confirmPassword: value,
+                    });
+                    // Validate on change
+                    if (value) {
+                      const validation = validateConfirmPassword(formData.password, value);
+                      if (validation.valid) {
+                        setErrors({ ...errors, confirmPassword: undefined });
+                      } else {
+                        setErrors({ ...errors, confirmPassword: validation.error });
+                      }
+                    }
+                  }}
+                  className={errors.confirmPassword ? 'border-red-500' : ''}
                   required
                 />
+                {errors.confirmPassword && (
+                  <p className="text-sm text-red-500">{errors.confirmPassword}</p>
+                )}
               </div>
               <div className="flex items-center space-x-2">
-                <Checkbox id="terms" required />
+                <Checkbox
+                  id="terms"
+                  className="border-black data-[state=checked]:bg-black data-[state=checked]:text-white focus-visible:ring-black"
+                  required
+                />
                 <Label htmlFor="terms" className="text-sm font-normal">
-                  Tôi đồng ý với{" "}
-                  <Link
-                    href="/terms"
-                    className="text-primary underline-offset-4 hover:underline"
-                  >
+                  Tôi đồng ý với{' '}
+                  <Link href="/terms" className="text-black underline-offset-4 hover:underline">
                     Điều khoản dịch vụ
-                  </Link>{" "}
-                  và{" "}
-                  <Link
-                    href="/privacy"
-                    className="text-primary underline-offset-4 hover:underline"
-                  >
+                  </Link>{' '}
+                  và{' '}
+                  <Link href="/privacy" className="text-black underline-offset-4 hover:underline">
                     Chính sách bảo mật
                   </Link>
                 </Label>
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Đang xử lý..." : "Đăng ký"}
+              <Button
+                type="submit"
+                className="w-full bg-black text-white hover:bg-black/90"
+                disabled={loading}
+              >
+                {loading ? 'Đang xử lý...' : 'Đăng ký'}
               </Button>
             </form>
             <div className="relative flex items-center justify-center">
@@ -197,11 +301,8 @@ export default function RegisterPage() {
             </div>
 
             <div className="text-center text-sm">
-              Đã có tài khoản?{" "}
-              <Link
-                href="/login"
-                className="text-primary underline-offset-4 hover:underline"
-              >
+              Đã có tài khoản?{' '}
+              <Link href="/login" className="text-black underline-offset-4 hover:underline">
                 Đăng nhập
               </Link>
             </div>

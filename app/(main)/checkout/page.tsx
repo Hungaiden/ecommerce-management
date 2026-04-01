@@ -23,6 +23,13 @@ import {
   validateDiscountCode,
   type ValidateDiscountResponse,
 } from '@/service/admin/discounts';
+import {
+  validateFullName,
+  validateEmail,
+  validatePhoneNumber,
+  validateAddress,
+  trimInput,
+} from '@/lib/validations/form';
 
 export default function CheckoutPage() {
   const { selectedItems, removeSelectedItems } = useCart();
@@ -41,6 +48,14 @@ export default function CheckoutPage() {
   const [discountCodeInput, setDiscountCodeInput] = useState('');
   const [isApplyingDiscount, setIsApplyingDiscount] = useState(false);
   const [appliedDiscount, setAppliedDiscount] = useState<ValidateDiscountResponse | null>(null);
+
+  // Validation errors state
+  const [errors, setErrors] = useState<{
+    name?: string;
+    email?: string;
+    phone?: string;
+    address?: string;
+  }>({});
 
   // Pre-fill from auth
   useEffect(() => {
@@ -93,6 +108,30 @@ export default function CheckoutPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedItems.length === 0) return;
+
+    // Reset errors
+    setErrors({});
+
+    // Validate all fields
+    const nameValidation = validateFullName(name);
+    const emailValidation = validateEmail(email);
+    const phoneValidation = validatePhoneNumber(phone);
+    const addressValidation = validateAddress(address);
+
+    // Collect errors
+    const newErrors: typeof errors = {};
+    if (!nameValidation.valid) newErrors.name = nameValidation.error;
+    if (!emailValidation.valid) newErrors.email = emailValidation.error;
+    if (!phoneValidation.valid) newErrors.phone = phoneValidation.error;
+    if (!addressValidation.valid) newErrors.address = addressValidation.error;
+
+    // If there are any errors, show them and return
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      toast.error('Vui lòng kiểm tra lại các trường');
+      return;
+    }
+
     setIsProcessing(true);
     try {
       const order = await createOrder({
@@ -107,7 +146,12 @@ export default function CheckoutPage() {
           quantity: item.quantity,
           subtotal: item.price * item.quantity,
         })),
-        contact_info: { name, phone, email, address },
+        contact_info: {
+          name: trimInput(name),
+          phone: trimInput(phone),
+          email: trimInput(email),
+          address: trimInput(address),
+        },
         note,
         total_price: finalTotalPrice,
         discount_id: appliedDiscount?.discountId,
@@ -187,10 +231,24 @@ export default function CheckoutPage() {
                     <Input
                       id="name"
                       value={name}
-                      onChange={(e) => setName(e.target.value)}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setName(value);
+                        // Validate on change
+                        if (value) {
+                          const validation = validateFullName(value);
+                          if (validation.valid) {
+                            setErrors({ ...errors, name: undefined });
+                          } else {
+                            setErrors({ ...errors, name: validation.error });
+                          }
+                        }
+                      }}
+                      className={errors.name ? 'border-red-500' : ''}
                       required
                       placeholder="Nguyễn Văn A"
                     />
+                    {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -199,10 +257,24 @@ export default function CheckoutPage() {
                         id="email"
                         type="email"
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setEmail(value);
+                          // Validate on change
+                          if (value) {
+                            const validation = validateEmail(value);
+                            if (validation.valid) {
+                              setErrors({ ...errors, email: undefined });
+                            } else {
+                              setErrors({ ...errors, email: validation.error });
+                            }
+                          }
+                        }}
+                        className={errors.email ? 'border-red-500' : ''}
                         required
                         placeholder="example@email.com"
                       />
+                      {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="phone">Số điện thoại</Label>
@@ -210,10 +282,24 @@ export default function CheckoutPage() {
                         id="phone"
                         type="tel"
                         value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setPhone(value);
+                          // Validate on change
+                          if (value) {
+                            const validation = validatePhoneNumber(value);
+                            if (validation.valid) {
+                              setErrors({ ...errors, phone: undefined });
+                            } else {
+                              setErrors({ ...errors, phone: validation.error });
+                            }
+                          }
+                        }}
+                        className={errors.phone ? 'border-red-500' : ''}
                         required
                         placeholder="0912345678"
                       />
+                      {errors.phone && <p className="text-sm text-red-500">{errors.phone}</p>}
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -221,10 +307,24 @@ export default function CheckoutPage() {
                     <Input
                       id="address"
                       value={address}
-                      onChange={(e) => setAddress(e.target.value)}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setAddress(value);
+                        // Validate on change
+                        if (value) {
+                          const validation = validateAddress(value);
+                          if (validation.valid) {
+                            setErrors({ ...errors, address: undefined });
+                          } else {
+                            setErrors({ ...errors, address: validation.error });
+                          }
+                        }
+                      }}
+                      className={errors.address ? 'border-red-500' : ''}
                       required
                       placeholder="Số nhà, đường, phường, quận, thành phố"
                     />
+                    {errors.address && <p className="text-sm text-red-500">{errors.address}</p>}
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="note">Ghi chú (tuỳ chọn)</Label>

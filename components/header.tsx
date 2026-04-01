@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -8,7 +8,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from '@/components/ui/dropdown-menu';
 import {
   Sheet,
   SheetContent,
@@ -16,13 +16,13 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/ui/sheet";
-import { useAuth } from "@/context/AuthContext";
-import { useCart } from "@/context/cart-context";
-import { ShoppingCart, Menu, User } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+} from '@/components/ui/sheet';
+import { useAuth } from '@/context/AuthContext';
+import { useCart } from '@/context/cart-context';
+import { ShoppingCart, Menu, User } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -41,22 +41,22 @@ export function Header() {
       setIsScrolled(window.scrollY > 10);
     };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const navLinks = [
-    { href: "/", label: "Trang chủ", exact: true },
-    { href: "/shop", label: "Cửa hàng", exact: false },
-    { href: "/about", label: "Về chúng tôi", exact: false },
+    { href: '/', label: 'Trang chủ', exact: true },
+    { href: '/shop', label: 'Cửa hàng', exact: false },
+    { href: '/about', label: 'Về chúng tôi', exact: false },
   ] as const;
 
   return (
     <header
       className={`sticky top-0 z-50 w-full transition-all duration-300 border-b ${
         isScrolled
-          ? "bg-white/95 backdrop-blur-md shadow-sm border-gray-200"
-          : "bg-white border-transparent"
+          ? 'bg-white/95 backdrop-blur-md shadow-sm border-gray-200'
+          : 'bg-white border-transparent'
       }`}
     >
       <div className="container mx-auto px-4 md:px-6">
@@ -78,26 +78,22 @@ export function Header() {
               </SheetTrigger>
               <SheetContent side="left">
                 <SheetHeader>
-                  <SheetTitle className="text-xl font-bold">
-                    TrendVibe
-                  </SheetTitle>
-                  <SheetDescription>
-                    Khám phá cửa hàng của chúng tôi
-                  </SheetDescription>
+                  <SheetTitle className="text-xl font-bold">TrendVibe</SheetTitle>
+                  <SheetDescription>Khám phá cửa hàng của chúng tôi</SheetDescription>
                 </SheetHeader>
                 <nav className="grid gap-5 py-6">
                   {navLinks.map(({ href, label }) => (
                     <Link
                       key={href}
                       href={href}
-                      className="text-sm font-medium hover:text-gray-500 transition-colors"
+                      className="text-base font-medium text-black/70 hover:text-black transition-colors"
                     >
                       {label}
                     </Link>
                   ))}
                   <Link
                     href="/contact"
-                    className="text-sm font-medium hover:text-gray-500 transition-colors"
+                    className="text-base font-medium text-black/70 hover:text-black transition-colors"
                   >
                     Liên hệ
                   </Link>
@@ -110,9 +106,7 @@ export function Header() {
               <h1 className="text-2xl md:text-3xl font-bold tracking-wide group-hover:opacity-75 transition-opacity">
                 TrendVibe
               </h1>
-              <p className="text-[10px] text-gray-400 uppercase tracking-[0.25em] mt-0.5">
-                THEME
-              </p>
+              <p className="text-[10px] text-gray-400 uppercase tracking-[0.25em] mt-0.5">THEME</p>
             </Link>
 
             {/* Logo - mobile (centered via grid) */}
@@ -122,21 +116,21 @@ export function Header() {
           </div>
 
           {/* Center - Navigation (desktop only) */}
-          <nav className="hidden md:flex items-center gap-10">
+          <nav className="hidden md:flex items-center gap-12">
             {navLinks.map(({ href, label, exact }) => {
-              const isActive = exact
-                ? pathname === href
-                : pathname.startsWith(href);
+              const isActive = exact ? pathname === href : pathname.startsWith(href);
               return (
                 <Link
                   key={href}
                   href={href}
-                  className="relative text-[15px] font-normal tracking-wide text-gray-700 hover:text-black transition-colors pb-1 group"
+                  className={`relative text-base font-medium tracking-wide transition-colors pb-1 group ${
+                    isActive ? 'text-black' : 'text-black/70 hover:text-black'
+                  }`}
                 >
                   {label}
                   <span
-                    className={`absolute bottom-0 left-0 h-[1.5px] bg-black transition-all duration-300 ${
-                      isActive ? "w-full" : "w-0 group-hover:w-full"
+                    className={`absolute bottom-0 left-1/2 -translate-x-1/2 h-[2px] bg-black transition-all duration-300 ${
+                      isActive ? 'w-6' : 'w-0 group-hover:w-6'
                     }`}
                   />
                 </Link>
@@ -158,16 +152,14 @@ export function Header() {
                     className="hidden md:flex w-10 h-10 hover:bg-gray-100 transition-colors rounded-full"
                   >
                     <div className="w-7 h-7 rounded-full bg-gray-900 text-white flex items-center justify-center text-xs font-medium">
-                      {user.fullName?.charAt(0).toUpperCase() ?? "U"}
+                      {user.fullName?.charAt(0).toUpperCase() ?? 'U'}
                     </div>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuLabel className="flex flex-col gap-0.5">
                     <span className="font-medium">{user.fullName}</span>
-                    <span className="text-xs text-gray-400 font-normal truncate">
-                      {user.email}
-                    </span>
+                    <span className="text-xs text-gray-400 font-normal truncate">{user.email}</span>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
@@ -192,7 +184,7 @@ export function Header() {
             ) : (
               <Link
                 href="/login"
-                className="hidden md:flex items-center text-[14px] font-normal tracking-wide text-gray-700 hover:text-black transition-colors px-2 py-2 rounded-md hover:bg-gray-100"
+                className="hidden md:flex items-center text-base font-medium tracking-wide text-black/70 hover:text-black transition-colors px-2 py-2 rounded-md hover:bg-gray-100"
               >
                 Đăng nhập
               </Link>
@@ -213,9 +205,7 @@ export function Header() {
               <DropdownMenuContent align="end" className="w-56">
                 {user ? (
                   <>
-                    <DropdownMenuLabel>
-                      {user?.fullName || "Tài khoản của tôi"}
-                    </DropdownMenuLabel>
+                    <DropdownMenuLabel>{user?.fullName || 'Tài khoản của tôi'}</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem asChild>
                       <Link href="/profile" className="cursor-pointer">
@@ -228,10 +218,7 @@ export function Header() {
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={logout}
-                      className="cursor-pointer"
-                    >
+                    <DropdownMenuItem onClick={logout} className="cursor-pointer">
                       Đăng xuất
                     </DropdownMenuItem>
                   </>
@@ -274,7 +261,7 @@ export function Header() {
                 <ShoppingCart className="h-[18px] w-[18px] stroke-[1.5]" />
                 {cartCount > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] px-1 flex items-center justify-center bg-black text-white text-[10px] font-semibold rounded-full leading-none">
-                    {cartCount > 99 ? "99+" : cartCount}
+                    {cartCount > 99 ? '99+' : cartCount}
                   </span>
                 )}
                 <span className="sr-only">Giỏ hàng</span>

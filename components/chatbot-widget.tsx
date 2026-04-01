@@ -1,36 +1,28 @@
-"use client";
+'use client';
 
-import { AnimatePresence, motion } from "framer-motion";
-import {
-  Bot,
-  MessageCircle,
-  SendHorizontal,
-  Sparkles,
-  User,
-  X,
-} from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { AnimatePresence, motion } from 'framer-motion';
+import { Bot, MessageCircle, SendHorizontal, Sparkles, User, X } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Textarea } from "@/components/ui/textarea";
-import { formatCurrency } from "@/lib/utils";
-import { getGroq } from "@/service/getGroq";
-import type { Product } from "@/service/products";
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Textarea } from '@/components/ui/textarea';
+import { formatCurrency } from '@/lib/utils';
+import { getGroq } from '@/service/getGroq';
+import type { Product } from '@/service/products';
 
-const FALLBACK_IMAGE =
-  "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80";
+const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80';
 
 const QUICK_PROMPTS = [
-  "Tìm váy đi tiệc dưới 1 triệu",
-  "Mình cần áo sơ mi công sở màu trắng",
-  "Gợi ý outfit đi chơi cuối tuần",
+  'Tìm váy đi tiệc dưới 1 triệu',
+  'Mình cần áo sơ mi công sở màu trắng',
+  'Gợi ý outfit đi chơi cuối tuần',
 ];
 
-type MessageRole = "assistant" | "user";
+type MessageRole = 'assistant' | 'user';
 
 interface ChatMessage {
   id: string;
@@ -39,26 +31,25 @@ interface ChatMessage {
   products?: Product[];
 }
 
-const createMessageId = () =>
-  `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+const createMessageId = () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
 export function ChatbotWidget() {
   const [isOpen, setIsOpen] = useState(false);
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
-      id: "chatbot-welcome",
-      role: "assistant",
+      id: 'chatbot-welcome',
+      role: 'assistant',
       content:
-        "Xin chào, mình là trợ lý AI của TrendVibe. Hãy mô tả nhu cầu mua sắm, mình sẽ gợi ý sản phẩm phù hợp ngay cho bạn.",
+        'Xin chào, mình là trợ lý AI của TrendVibe. Hãy mô tả nhu cầu mua sắm, mình sẽ gợi ý sản phẩm phù hợp ngay cho bạn.',
     },
   ]);
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [isOpen, isLoading, messages]);
 
   const handleSendMessage = async (presetMessage?: string) => {
@@ -67,43 +58,38 @@ export function ChatbotWidget() {
 
     const userMessage: ChatMessage = {
       id: createMessageId(),
-      role: "user",
+      role: 'user',
       content,
     };
 
     const historySnapshot = [...messages, userMessage];
 
     setMessages(historySnapshot);
-    setInput("");
+    setInput('');
     setIsLoading(true);
 
     try {
       const context = historySnapshot
         .slice(-6)
-        .map(
-          (item) =>
-            `${item.role === "user" ? "User" : "Assistant"}: ${item.content}`,
-        )
-        .join("\n");
+        .map((item) => `${item.role === 'user' ? 'User' : 'Assistant'}: ${item.content}`)
+        .join('\n');
 
       const response = await getGroq.recommendProduct({
         message: content,
         context,
       });
 
-      const products = Array.isArray(response?.products)
-        ? response.products
-        : [];
+      const products = Array.isArray(response?.products) ? response.products : [];
 
       setMessages((prev) => [
         ...prev,
         {
           id: createMessageId(),
-          role: "assistant",
+          role: 'assistant',
           content:
             products.length > 0
               ? `Mình đã chọn được ${products.length} sản phẩm phù hợp với yêu cầu của bạn.`
-              : "Mình chưa tìm thấy sản phẩm đủ phù hợp. Bạn thử mô tả rõ hơn về màu sắc, ngân sách hoặc kiểu dáng nhé.",
+              : 'Mình chưa tìm thấy sản phẩm đủ phù hợp. Bạn thử mô tả rõ hơn về màu sắc, ngân sách hoặc kiểu dáng nhé.',
           products,
         },
       ]);
@@ -112,9 +98,9 @@ export function ChatbotWidget() {
         ...prev,
         {
           id: createMessageId(),
-          role: "assistant",
+          role: 'assistant',
           content:
-            "Hiện tại hệ thống AI đang bận. Bạn thử lại sau ít phút hoặc đổi cách mô tả yêu cầu nhé.",
+            'Hiện tại hệ thống AI đang bận. Bạn thử lại sau ít phút hoặc đổi cách mô tả yêu cầu nhé.',
         },
       ]);
     } finally {
@@ -123,7 +109,7 @@ export function ChatbotWidget() {
   };
 
   const handleInputKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key === "Enter" && !event.shiftKey) {
+    if (event.key === 'Enter' && !event.shiftKey) {
       event.preventDefault();
       void handleSendMessage();
     }
@@ -137,20 +123,20 @@ export function ChatbotWidget() {
             initial={{ opacity: 0, y: 24, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.96 }}
-            transition={{ duration: 0.22, ease: "easeOut" }}
+            transition={{ duration: 0.22, ease: 'easeOut' }}
             className="fixed bottom-24 right-4 z-50 w-[calc(100vw-1rem)] sm:right-5 sm:w-[420px]"
           >
-            <div className="relative overflow-hidden rounded-2xl border border-emerald-100 bg-white shadow-[0_24px_70px_rgba(16,185,129,0.25)]">
-              <div className="pointer-events-none absolute -right-16 -top-20 h-44 w-44 rounded-full bg-emerald-200/40 blur-3xl" />
-              <div className="pointer-events-none absolute -left-12 bottom-20 h-36 w-36 rounded-full bg-cyan-100/50 blur-3xl" />
+            <div className="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-[0_24px_70px_rgba(0,0,0,0.18)]">
+              <div className="pointer-events-none absolute -right-16 -top-20 h-44 w-44 rounded-full bg-gray-300/30 blur-3xl" />
+              <div className="pointer-events-none absolute -left-12 bottom-20 h-36 w-36 rounded-full bg-gray-200/40 blur-3xl" />
 
-              <div className="relative flex items-start justify-between gap-3 border-b bg-gradient-to-r from-emerald-600 to-teal-600 px-4 py-3 text-white">
+              <div className="relative flex items-start justify-between gap-3 border-b bg-gradient-to-r from-black to-gray-800 px-4 py-3 text-white">
                 <div>
                   <p className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wider">
                     <Sparkles className="h-4 w-4" />
                     TrendVibe Assistant
                   </p>
-                  <p className="mt-1 text-xs text-emerald-50">
+                  <p className="mt-1 text-xs text-gray-200">
                     Tư vấn nhanh theo nhu cầu thật của bạn
                   </p>
                 </div>
@@ -166,10 +152,8 @@ export function ChatbotWidget() {
               </div>
 
               {messages.length <= 1 && (
-                <div className="border-b bg-emerald-50/50 px-4 py-3">
-                  <p className="mb-2 text-xs font-medium text-emerald-800">
-                    Gợi ý nhanh
-                  </p>
+                <div className="border-b bg-gray-100 px-4 py-3">
+                  <p className="mb-2 text-xs font-medium text-gray-800">Gợi ý nhanh</p>
                   <div className="flex flex-wrap gap-2">
                     {QUICK_PROMPTS.map((prompt) => (
                       <button
@@ -177,7 +161,7 @@ export function ChatbotWidget() {
                         type="button"
                         onClick={() => void handleSendMessage(prompt)}
                         disabled={isLoading}
-                        className="rounded-full border border-emerald-200 bg-white px-3 py-1 text-xs text-emerald-700 transition-colors hover:border-emerald-400 hover:text-emerald-900 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="rounded-full border border-gray-300 bg-white px-3 py-1 text-xs text-gray-700 transition-colors hover:border-gray-700 hover:text-black disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {prompt}
                       </button>
@@ -186,20 +170,20 @@ export function ChatbotWidget() {
                 </div>
               )}
 
-              <ScrollArea className="h-[420px] bg-gradient-to-b from-white via-white to-emerald-50/40 px-4 py-3">
+              <ScrollArea className="h-[420px] bg-gradient-to-b from-white via-white to-gray-100/70 px-4 py-3">
                 <div className="space-y-3">
                   {messages.map((message) => {
-                    const isAssistant = message.role === "assistant";
+                    const isAssistant = message.role === 'assistant';
 
                     return (
                       <div
                         key={message.id}
                         className={`flex items-start gap-2 ${
-                          isAssistant ? "justify-start" : "justify-end"
+                          isAssistant ? 'justify-start' : 'justify-end'
                         }`}
                       >
                         {isAssistant && (
-                          <span className="mt-1 inline-flex h-7 w-7 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                          <span className="mt-1 inline-flex h-7 w-7 items-center justify-center rounded-full bg-gray-200 text-gray-800">
                             <Bot className="h-4 w-4" />
                           </span>
                         )}
@@ -207,8 +191,8 @@ export function ChatbotWidget() {
                         <div
                           className={`max-w-[84%] rounded-2xl px-3 py-2 text-sm leading-relaxed ${
                             isAssistant
-                              ? "border border-emerald-100 bg-white text-gray-700"
-                              : "bg-emerald-600 text-white"
+                              ? 'border border-gray-200 bg-white text-gray-700'
+                              : 'bg-black text-white'
                           }`}
                         >
                           <p>{message.content}</p>
@@ -217,20 +201,17 @@ export function ChatbotWidget() {
                             <div className="mt-3 space-y-2">
                               {message.products.map((product) => {
                                 const thumbnail =
-                                  product.thumbnail ||
-                                  product.images?.[0] ||
-                                  FALLBACK_IMAGE;
+                                  product.thumbnail || product.images?.[0] || FALLBACK_IMAGE;
                                 const discountedPrice =
                                   product.discount && product.discount > 0
-                                    ? product.price *
-                                      (1 - product.discount / 100)
+                                    ? product.price * (1 - product.discount / 100)
                                     : null;
 
                                 return (
                                   <Link
                                     href={`/shop/${product._id}`}
                                     key={product._id}
-                                    className="block rounded-xl border border-emerald-100 bg-emerald-50/70 p-2 transition-colors hover:border-emerald-300"
+                                    className="block rounded-xl border border-gray-200 bg-gray-100/80 p-2 transition-colors hover:border-gray-500"
                                   >
                                     <div className="flex gap-3">
                                       <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-md bg-white">
@@ -257,9 +238,7 @@ export function ChatbotWidget() {
                                           {discountedPrice ? (
                                             <>
                                               <span className="font-semibold text-red-600">
-                                                {formatCurrency(
-                                                  discountedPrice,
-                                                )}
+                                                {formatCurrency(discountedPrice)}
                                               </span>
                                               <span className="text-gray-400 line-through">
                                                 {formatCurrency(product.price)}
@@ -287,7 +266,7 @@ export function ChatbotWidget() {
                         </div>
 
                         {!isAssistant && (
-                          <span className="mt-1 inline-flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-white">
+                          <span className="mt-1 inline-flex h-7 w-7 items-center justify-center rounded-full bg-black text-white">
                             <User className="h-4 w-4" />
                           </span>
                         )}
@@ -297,10 +276,10 @@ export function ChatbotWidget() {
 
                   {isLoading && (
                     <div className="flex items-start gap-2">
-                      <span className="mt-1 inline-flex h-7 w-7 items-center justify-center rounded-full bg-emerald-100 text-emerald-700">
+                      <span className="mt-1 inline-flex h-7 w-7 items-center justify-center rounded-full bg-gray-200 text-gray-800">
                         <Bot className="h-4 w-4" />
                       </span>
-                      <div className="rounded-2xl border border-emerald-100 bg-white px-3 py-2 text-sm text-gray-500">
+                      <div className="rounded-2xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-500">
                         Đang phân tích yêu cầu và chọn sản phẩm...
                       </div>
                     </div>
@@ -317,14 +296,14 @@ export function ChatbotWidget() {
                     onChange={(event) => setInput(event.target.value)}
                     onKeyDown={handleInputKeyDown}
                     placeholder="Nhập yêu cầu của bạn..."
-                    className="min-h-[44px] max-h-28 resize-none border-emerald-200 text-sm focus-visible:ring-emerald-500"
+                    className="min-h-[44px] max-h-28 resize-none border-gray-300 text-sm focus-visible:ring-gray-900"
                   />
                   <Button
                     type="button"
                     size="icon"
                     onClick={() => void handleSendMessage()}
                     disabled={isLoading || !input.trim()}
-                    className="h-11 w-11 shrink-0 rounded-xl bg-emerald-600 hover:bg-emerald-700"
+                    className="h-11 w-11 shrink-0 rounded-xl bg-black hover:bg-gray-900"
                     aria-label="Gửi tin nhắn"
                   >
                     <SendHorizontal className="h-4 w-4" />
@@ -349,14 +328,10 @@ export function ChatbotWidget() {
           type="button"
           size="icon"
           onClick={() => setIsOpen((prev) => !prev)}
-          className="relative h-14 w-14 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-[0_16px_30px_rgba(16,185,129,0.45)] hover:from-emerald-600 hover:to-teal-700"
-          aria-label={isOpen ? "Đóng cửa sổ chatbot" : "Mở cửa sổ chatbot"}
+          className="relative h-14 w-14 rounded-full bg-gradient-to-br from-black to-gray-800 text-white shadow-[0_16px_30px_rgba(0,0,0,0.35)] hover:from-gray-900 hover:to-gray-700"
+          aria-label={isOpen ? 'Đóng cửa sổ chatbot' : 'Mở cửa sổ chatbot'}
         >
-          {isOpen ? (
-            <X className="h-5 w-5" />
-          ) : (
-            <MessageCircle className="h-5 w-5" />
-          )}
+          {isOpen ? <X className="h-5 w-5" /> : <MessageCircle className="h-5 w-5" />}
         </Button>
       </motion.div>
     </>

@@ -15,6 +15,7 @@ import {
   Mail,
   Star,
   Percent,
+  Image,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -71,6 +72,11 @@ const navItems: NavItem[] = [
     label: 'Khuyến mãi',
     href: '/admin/discounts',
     icon: <Percent className="h-5 w-5" />,
+  },
+  {
+    label: 'Banner',
+    href: '/admin/banners',
+    icon: <Image className="h-5 w-5" />,
   },
 ];
 

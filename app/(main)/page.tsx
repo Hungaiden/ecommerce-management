@@ -9,6 +9,8 @@ import { useEffect, useState } from 'react';
 import { getProducts, type Product } from '@/service/products';
 import { formatCurrency } from '@/lib/utils';
 import { getActiveDiscountProgram, type Discount } from '@/service/admin/discounts';
+import { getActiveBanners, type Banner } from '@/service/admin/banners';
+import BannerSlider from '@/components/banner-slider';
 
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80';
 
@@ -17,6 +19,7 @@ export default function Home() {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [productsLoading, setProductsLoading] = useState(true);
   const [activeDiscountProgram, setActiveDiscountProgram] = useState<Discount | null>(null);
+  const [banners, setBanners] = useState<Banner[]>([]);
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -67,10 +70,32 @@ export default function Home() {
   }, [activeDiscountProgram?.validUntil]);
 
   useEffect(() => {
+    // Try to fetch featured products first
     getProducts({ isFeatured: true, limit: 6, status: 'active' })
-      .then((res) => setFeaturedProducts((res?.hits as Product[]) ?? []))
-      .catch(() => {})
-      .finally(() => setProductsLoading(false));
+      .then((res) => {
+        const featured = (res?.hits as Product[]) ?? [];
+        // If no featured products, fallback to all active products
+        if (featured.length === 0) {
+          return getProducts({ limit: 6, status: 'active' })
+            .then((fallbackRes) => setFeaturedProducts((fallbackRes?.hits as Product[]) ?? []))
+            .catch(() => setFeaturedProducts([]));
+        }
+        setFeaturedProducts(featured);
+      })
+      .catch(() => {
+        // On error, try to get all active products as fallback
+        getProducts({ limit: 6, status: 'active' })
+          .then((res) => setFeaturedProducts((res?.hits as Product[]) ?? []))
+          .catch(() => setFeaturedProducts([]));
+      });
+
+    setProductsLoading(false);
+  }, []);
+
+  useEffect(() => {
+    getActiveBanners()
+      .then((res) => setBanners(res.data.hits))
+      .catch(() => setBanners([]));
   }, []);
 
   if (!isLoaded) {
@@ -96,38 +121,83 @@ export default function Home() {
       className="flex min-h-screen flex-col"
     >
       <main className="flex-1">
-        {/* Hero Section */}
-        <section className="relative bg-[#e8e8e8] min-h-[700px] flex items-center">
-          <div className="w-full">
-            <div className="hidden lg:grid" style={{ gridTemplateColumns: '1fr 1.8fr 1fr' }}>
-              {/* Left - Model in Black Hoodie */}
-              <motion.div
-                initial={{ opacity: 0, x: -50 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8 }}
-                className="h-[700px] bg-cover bg-center relative"
-                style={{
-                  backgroundImage:
-                    'url(https://images.unsplash.com/photo-1581044777550-4cfa60707c03?w=800&q=90)',
-                }}
-              >
-                <div
-                  className="absolute inset-0"
+        {/* Banner Slider - Full width hero section */}
+        {banners.length > 0 ? (
+          <BannerSlider banners={banners} autoplayInterval={4000} />
+        ) : (
+          <section className="relative bg-[#e8e8e8] min-h-[700px] flex items-center">
+            <div className="w-full">
+              <div className="hidden lg:grid" style={{ gridTemplateColumns: '1fr 1.8fr 1fr' }}>
+                {/* Left - Model in Black Hoodie */}
+                <motion.div
+                  initial={{ opacity: 0, x: -50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8 }}
+                  className="h-[700px] bg-cover bg-center relative"
                   style={{
-                    background: 'linear-gradient(to right, transparent 40%, #e8e8e8 100%)',
+                    backgroundImage:
+                      'url(https://images.unsplash.com/photo-1581044777550-4cfa60707c03?w=800&q=90)',
                   }}
-                />
-              </motion.div>
+                >
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background: 'linear-gradient(to right, transparent 40%, #e8e8e8 100%)',
+                    }}
+                  />
+                </motion.div>
 
-              {/* Center - Content */}
+                {/* Center - Content */}
+                <motion.div
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.2 }}
+                  className="text-center flex flex-col items-center justify-center px-8"
+                >
+                  <h1 className="text-4xl md:text-6xl font-light tracking-tight mb-6">TrendVibe</h1>
+                  <p className="text-base md:text-lg text-gray-500 mb-10 max-w-xl mx-auto tracking-wide">
+                    Biến những dịp đặc biệt của bạn trở nên ấn tượng hơn với phong cách thời trang
+                    tinh tế.
+                  </p>
+                  <Link href="/shop">
+                    <Button
+                      size="lg"
+                      className="bg-[#3d3d3d] hover:bg-[#2d2d2d] text-white px-10 py-6 text-base font-normal rounded-none tracking-wide transition-all duration-300"
+                    >
+                      Mua sắm ngay
+                    </Button>
+                  </Link>
+                </motion.div>
+
+                {/* Right - Model in Gray Sweater */}
+                <motion.div
+                  initial={{ opacity: 0, x: 50 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.8, delay: 0.4 }}
+                  className="h-[700px] bg-cover bg-center relative"
+                  style={{
+                    backgroundImage:
+                      'url(https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=800&q=90)',
+                  }}
+                >
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      background: 'linear-gradient(to left, transparent 40%, #e8e8e8 100%)',
+                    }}
+                  />
+                </motion.div>
+              </div>
+
+              {/* Mobile view */}
               <motion.div
                 initial={{ opacity: 0, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                className="text-center flex flex-col items-center justify-center px-8"
+                className="lg:hidden text-center py-20 px-8"
               >
-                <h1 className="text-4xl md:text-6xl font-light tracking-tight mb-6">TrendVibe</h1>
-                <p className="text-base md:text-lg text-gray-500 mb-10 max-w-xl mx-auto tracking-wide">
+                <h1 className="text-4xl font-light tracking-tight mb-6">TrendVibe</h1>
+                <p className="text-base text-gray-500 mb-10 max-w-xl mx-auto tracking-wide">
                   Biến những dịp đặc biệt của bạn trở nên ấn tượng hơn với phong cách thời trang
                   tinh tế.
                 </p>
@@ -140,50 +210,9 @@ export default function Home() {
                   </Button>
                 </Link>
               </motion.div>
-
-              {/* Right - Model in Gray Sweater */}
-              <motion.div
-                initial={{ opacity: 0, x: 50 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
-                className="h-[700px] bg-cover bg-center relative"
-                style={{
-                  backgroundImage:
-                    'url(https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?w=800&q=90)',
-                }}
-              >
-                <div
-                  className="absolute inset-0"
-                  style={{
-                    background: 'linear-gradient(to left, transparent 40%, #e8e8e8 100%)',
-                  }}
-                />
-              </motion.div>
             </div>
-
-            {/* Mobile view */}
-            <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="lg:hidden text-center py-20 px-8"
-            >
-              <h1 className="text-4xl font-light tracking-tight mb-6">TrendVibe</h1>
-              <p className="text-base text-gray-500 mb-10 max-w-xl mx-auto tracking-wide">
-                Biến những dịp đặc biệt của bạn trở nên ấn tượng hơn với phong cách thời trang tinh
-                tế.
-              </p>
-              <Link href="/shop">
-                <Button
-                  size="lg"
-                  className="bg-[#3d3d3d] hover:bg-[#2d2d2d] text-white px-10 py-6 text-base font-normal rounded-none tracking-wide transition-all duration-300"
-                >
-                  Mua sắm ngay
-                </Button>
-              </Link>
-            </motion.div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* Features Section */}
         <section className="bg-[#2d2d2d] py-12">
@@ -262,7 +291,7 @@ export default function Home() {
               transition={{ duration: 0.5 }}
               className="flex flex-col items-center justify-center mb-12"
             >
-              <h2 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-ocean-600 to-ocean-500 bg-clip-text text-transparent mb-2 text-center">
+              <h2 className="text-4xl md:text-5xl font-bold text-black mb-2 text-center">
                 ✨ Sản phẩm nổi bật
               </h2>
               <p className="text-gray-600 text-sm md:text-base text-center">
@@ -313,7 +342,7 @@ export default function Home() {
                       'Áp dụng ngay tại trang thanh toán bằng cách nhập mã khuyến mãi.'}
                   </p>
                   <Link href="/shop">
-                    <Button className="bg-gradient-to-r from-ocean-600 to-ocean-500 hover:from-ocean-700 hover:to-ocean-600 text-white rounded-lg px-8 py-3 text-base font-bold tracking-wide shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
+                    <Button className="bg-black hover:bg-gray-900 text-white rounded-lg px-8 py-3 text-base font-bold tracking-wide shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
                       Mua ngay
                     </Button>
                   </Link>
@@ -374,13 +403,13 @@ export default function Home() {
                               )}
                             </div>
                             <div className="pt-4 pb-2">
-                              <h3 className="text-sm font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-ocean-600 transition-colors">
+                              <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-black transition-colors text-center">
                                 {product.name}
                               </h3>
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 justify-center">
                                 <p
                                   className={`text-base font-bold ${
-                                    discounted ? 'text-red-600' : 'text-gray-800'
+                                    discounted ? 'text-black' : 'text-black'
                                   }`}
                                 >
                                   {discounted
@@ -394,7 +423,7 @@ export default function Home() {
                                 )}
                               </div>
                               {product.rating && (
-                                <div className="flex items-center gap-1 mt-2">
+                                <div className="flex items-center gap-1 mt-2 justify-center">
                                   <span className="text-yellow-400 text-sm">★</span>
                                   <span className="text-xs text-gray-600">
                                     {product.rating} ({product.reviewCount || 0})
@@ -462,14 +491,14 @@ export default function Home() {
                               </div>
                             )}
                           </div>
-                          <div className="pt-3">
-                            <h3 className="text-xs font-semibold text-gray-900 line-clamp-2 group-hover:text-ocean-600 transition-colors">
+                          <div className="pt-3 flex flex-col items-center">
+                            <h3 className="text-lg font-semibold text-gray-900 line-clamp-2 group-hover:text-black transition-colors text-center">
                               {product.name}
                             </h3>
-                            <div className="flex items-center gap-2 mt-1">
+                            <div className="flex items-center justify-center gap-2 mt-1">
                               <p
                                 className={`text-sm font-bold ${
-                                  discounted ? 'text-red-600' : 'text-gray-800'
+                                  discounted ? 'text-black' : 'text-black'
                                 }`}
                               >
                                 {discounted
@@ -483,7 +512,7 @@ export default function Home() {
                               )}
                             </div>
                             {product.rating && (
-                              <div className="flex items-center gap-1 mt-1">
+                              <div className="flex items-center justify-center gap-1 mt-1">
                                 <span className="text-yellow-400 text-xs">★</span>
                                 <span className="text-xs text-gray-600">{product.rating}</span>
                               </div>

@@ -400,7 +400,7 @@ export default function ShopPage() {
                             <div className="flex items-center justify-center gap-2 mb-3">
                               {discountedPrice ? (
                                 <>
-                                  <span className="font-semibold text-lg text-red-600">
+                                  <span className="font-semibold text-lg text-black">
                                     {discountedPrice.toLocaleString('vi-VN')}₫
                                   </span>
                                   <span className="text-sm text-gray-400 line-through">
@@ -408,7 +408,7 @@ export default function ShopPage() {
                                   </span>
                                 </>
                               ) : (
-                                <span className="font-semibold text-lg">
+                                <span className="font-semibold text-lg text-black">
                                   {product.price.toLocaleString('vi-VN')}₫
                                 </span>
                               )}
@@ -454,7 +454,7 @@ export default function ShopPage() {
                             <div className="flex items-center gap-2">
                               {discountedPrice ? (
                                 <>
-                                  <span className="font-semibold text-lg text-red-600">
+                                  <span className="font-semibold text-lg text-black">
                                     {discountedPrice.toLocaleString('vi-VN')}₫
                                   </span>
                                   <span className="text-sm text-gray-400 line-through">
@@ -462,7 +462,7 @@ export default function ShopPage() {
                                   </span>
                                 </>
                               ) : (
-                                <span className="font-semibold text-lg">
+                                <span className="font-semibold text-lg text-black">
                                   {product.price.toLocaleString('vi-VN')}₫
                                 </span>
                               )}
