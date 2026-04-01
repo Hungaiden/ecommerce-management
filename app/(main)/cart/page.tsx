@@ -18,6 +18,7 @@ export default function CartPage() {
     isLoading,
     clearCart,
     toggleSelectAll,
+    removeSelectedItems,
   } = useCart();
   const cartCount = getCartCount();
   const selectedCount = getSelectedCount();
@@ -67,10 +68,21 @@ export default function CartPage() {
             <Button variant="outline" asChild>
               <Link href="/shop">Tiếp tục mua sắm</Link>
             </Button>
+            {selectedCount > 0 && (
+              <Button
+                variant="ghost"
+                className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                onClick={() => removeSelectedItems()}
+                disabled={isLoading}
+              >
+                Xoá {selectedCount} sản phẩm đã chọn
+              </Button>
+            )}
             <Button
               variant="ghost"
               className="text-red-500 hover:text-red-600 hover:bg-red-50"
               onClick={clearCart}
+              disabled={isLoading}
             >
               Xoá toàn bộ giỏ hàng
             </Button>

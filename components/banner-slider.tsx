@@ -40,7 +40,7 @@ export default function BannerSlider({ banners, autoplayInterval = 4000 }: Banne
 
   const currentBanner = banners[currentIndex];
 
-  const goToPrevious = () => {
+  const goToPrevious = () => { 
     setCurrentIndex((prev) => (prev === 0 ? banners.length - 1 : prev - 1));
   };
 
